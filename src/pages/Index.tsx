@@ -3,6 +3,11 @@ import { Helmet } from 'react-helmet-async';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/home/HeroSection';
+import AboutSection from '@/components/home/AboutSection';
+import ProjectsSection from '@/components/home/ProjectsSection';
+import SkillsSection from '@/components/home/SkillsSection';
+import CertificatesSection from '@/components/home/CertificatesSection';
+import ContactSection from '@/components/home/ContactSection';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Index: React.FC = () => {
@@ -31,6 +36,11 @@ const Index: React.FC = () => {
         <Navbar />
         <main>
           <HeroSection />
+          <AboutSection />
+          <ProjectsSection />
+          <SkillsSection />
+          <CertificatesSection />
+          <ContactSection />
         </main>
         <Footer />
       </div>
