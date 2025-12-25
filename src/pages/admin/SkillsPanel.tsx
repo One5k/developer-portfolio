@@ -115,7 +115,7 @@ const SkillsPanel: React.FC = () => {
     setFormData({
       name: skill.name,
       nameAr: skill.nameAr,
-      category: skill.category,
+      category: skill.category as typeof initialFormData.category,
       level: skill.level,
       icon: skill.icon || '',
     });
