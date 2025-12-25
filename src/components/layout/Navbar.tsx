@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Menu, X, Moon, Sun, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -9,14 +9,32 @@ import { cn } from '@/lib/utils';
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
   const { theme, toggleTheme } = useTheme();
-  const { language, setLanguage, t, direction } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
+
+      // Update active section based on scroll position
+      const sections = ['home', 'about', 'projects', 'skills', 'certificates', 'contact'];
+      const scrollPosition = window.scrollY + 100;
+
+      for (const section of sections) {
+        const element = document.getElementById(section === 'home' ? 'hero' : section);
+        if (element) {
+          const offsetTop = element.offsetTop;
+          const offsetHeight = element.offsetHeight;
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
     };
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -26,16 +44,30 @@ const Navbar: React.FC = () => {
   }, [location.pathname]);
 
   const navLinks = [
-    { path: '/', label: t('nav.home') },
-    { path: '/about', label: t('nav.about') },
-    { path: '/projects', label: t('nav.projects') },
-    { path: '/skills', label: t('nav.skills') },
-    { path: '/certificates', label: t('nav.certificates') },
-    { path: '/contact', label: t('nav.contact') },
+    { id: 'home', href: '#hero', label: t('nav.home') },
+    { id: 'about', href: '#about', label: t('nav.about') },
+    { id: 'projects', href: '#projects', label: t('nav.projects') },
+    { id: 'skills', href: '#skills', label: t('nav.skills') },
+    { id: 'certificates', href: '#certificates', label: t('nav.certificates') },
+    { id: 'contact', href: '#contact', label: t('nav.contact') },
   ];
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'ar' : 'en');
+  };
+
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const targetId = href.replace('#', '');
+    const element = document.getElementById(targetId);
+    if (element) {
+      const offsetTop = element.offsetTop - 80;
+      window.scrollTo({
+        top: offsetTop,
+        behavior: 'smooth',
+      });
+    }
+    setIsOpen(false);
   };
 
   return (
@@ -50,31 +82,33 @@ const Navbar: React.FC = () => {
       <div className="section-container">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link 
-            to="/" 
-            className="text-2xl font-bold gradient-text"
+          <a 
+            href="#hero"
+            onClick={(e) => scrollToSection(e, '#hero')}
+            className="text-2xl font-bold gradient-text cursor-pointer"
           >
             {'<Dev />'}
-          </Link>
+          </a>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
+              <a
+                key={link.id}
+                href={link.href}
+                onClick={(e) => scrollToSection(e, link.href)}
                 className={cn(
-                  'relative text-sm font-medium transition-colors duration-200 hover:text-primary',
-                  location.pathname === link.path
+                  'relative text-sm font-medium transition-colors duration-200 hover:text-primary cursor-pointer',
+                  activeSection === link.id
                     ? 'text-primary'
                     : 'text-muted-foreground'
                 )}
               >
                 {link.label}
-                {location.pathname === link.path && (
+                {activeSection === link.id && (
                   <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full" />
                 )}
-              </Link>
+              </a>
             ))}
           </div>
 
@@ -130,18 +164,19 @@ const Navbar: React.FC = () => {
         >
           <div className="glass-card rounded-xl p-4 space-y-2">
             {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
+              <a
+                key={link.id}
+                href={link.href}
+                onClick={(e) => scrollToSection(e, link.href)}
                 className={cn(
-                  'block px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200',
-                  location.pathname === link.path
+                  'block px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 cursor-pointer',
+                  activeSection === link.id
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 )}
               >
                 {link.label}
-              </Link>
+              </a>
             ))}
           </div>
         </div>

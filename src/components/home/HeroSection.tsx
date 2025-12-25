@@ -8,7 +8,7 @@ const HeroSection: React.FC = () => {
   const { t, direction } = useLanguage();
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 tech-grid opacity-50" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
