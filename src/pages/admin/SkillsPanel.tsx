@@ -30,6 +30,7 @@ const SkillsPanel: React.FC = () => {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const initialFormData = {
     name: '',
@@ -39,7 +40,7 @@ const SkillsPanel: React.FC = () => {
     icon: '',
   };
 
-  const [formData, setFormData] = useState<typeof initialFormData>(initialFormData);
+  const [formData, setFormData] = useState(initialFormData);
 
   const translations = {
     en: {
@@ -53,11 +54,13 @@ const SkillsPanel: React.FC = () => {
       level: 'Proficiency Level',
       icon: 'Icon Name (optional)',
       save: 'Save',
+      saving: 'Saving...',
       cancel: 'Cancel',
       delete: 'Delete',
       deleteConfirm: 'Are you sure you want to delete this skill?',
       saved: 'Skill saved successfully!',
       deleted: 'Skill deleted successfully!',
+      error: 'An error occurred. Please try again.',
       noSkills: 'No skills yet. Add your first skill!',
       categories: {
         frontend: 'Frontend',
@@ -78,11 +81,13 @@ const SkillsPanel: React.FC = () => {
       level: 'مستوى الإتقان',
       icon: 'اسم الأيقونة (اختياري)',
       save: 'حفظ',
+      saving: 'جاري الحفظ...',
       cancel: 'إلغاء',
       delete: 'حذف',
       deleteConfirm: 'هل أنت متأكد من حذف هذه المهارة؟',
       saved: 'تم حفظ المهارة بنجاح!',
       deleted: 'تم حذف المهارة بنجاح!',
+      error: 'حدث خطأ. حاول مرة أخرى.',
       noSkills: 'لا توجد مهارات بعد. أضف أول مهارة!',
       categories: {
         frontend: 'واجهة أمامية',
@@ -113,30 +118,41 @@ const SkillsPanel: React.FC = () => {
   const openEditDialog = (skill: Skill) => {
     setEditingSkill(skill);
     setFormData({
-      name: skill.name,
-      nameAr: skill.nameAr,
-      category: skill.category as typeof initialFormData.category,
-      level: skill.level,
-      icon: skill.icon || '',
+      name: skill.name_en,
+      nameAr: skill.name_ar,
+      category: skill.category as any,
+      level: skill.proficiency,
+      icon: skill.icon_name || '',
     });
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingSkill) {
-      updateSkill(editingSkill.id, formData);
-    } else {
-      addSkill(formData);
+    setIsLoading(true);
+    try {
+      if (editingSkill) {
+        await updateSkill(editingSkill.id, formData);
+      } else {
+        await addSkill(formData);
+      }
+      setIsDialogOpen(false);
+      toast({ title: texts.saved });
+    } catch (error) {
+      toast({ title: texts.error, variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
     }
-    setIsDialogOpen(false);
-    toast({ title: texts.saved });
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm(texts.deleteConfirm)) {
-      deleteSkill(id);
-      toast({ title: texts.deleted });
+      try {
+        await deleteSkill(id);
+        toast({ title: texts.deleted });
+      } catch (error) {
+        toast({ title: texts.error, variant: 'destructive' });
+      }
     }
   };
 
@@ -222,8 +238,8 @@ const SkillsPanel: React.FC = () => {
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   {texts.cancel}
                 </Button>
-                <Button type="submit" className="btn-gradient">
-                  {texts.save}
+                <Button type="submit" className="btn-gradient" disabled={isLoading}>
+                  {isLoading ? texts.saving : texts.save}
                 </Button>
               </div>
             </form>
@@ -255,7 +271,7 @@ const SkillsPanel: React.FC = () => {
                     >
                       <div className="flex items-center justify-between mb-3">
                         <span className="font-medium">
-                          {language === 'ar' ? skill.nameAr : skill.name}
+                          {language === 'ar' ? skill.name_ar : skill.name_en}
                         </span>
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
@@ -279,11 +295,11 @@ const SkillsPanel: React.FC = () => {
                       <div className="relative h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${categoryColors[category as keyof typeof categoryColors]}`}
-                          style={{ width: `${skill.level}%` }}
+                          style={{ width: `${skill.proficiency}%` }}
                         />
                       </div>
                       <p className="text-xs text-muted-foreground mt-1 text-right">
-                        {skill.level}%
+                        {skill.proficiency}%
                       </p>
                     </div>
                   ))}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminData, Profile } from '@/contexts/AdminDataContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +13,37 @@ const ProfilePanel: React.FC = () => {
   const { language } = useLanguage();
   const { profile, updateProfile } = useAdminData();
   const { toast } = useToast();
-  const [formData, setFormData] = useState<Profile>(profile);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Initialize with empty defaults to prevent controlled/uncontrolled errors
+  const [formData, setFormData] = useState<Profile>({
+    id: '',
+    user_id: '',
+    name_en: '',
+    name_ar: '',
+    title_en: '',
+    title_ar: '',
+    bio_en: '',
+    bio_ar: '',
+    email: '',
+    phone: '',
+    location_en: '',
+    location_ar: '',
+    github_url: '',
+    linkedin_url: '',
+    twitter_url: '',
+    avatar_url: '',
+    resume_url: '',
+    created_at: '',
+    updated_at: ''
+  });
+
+  // Update form data when profile data is loaded
+  useEffect(() => {
+    if (profile) {
+      setFormData(profile);
+    }
+  }, [profile]);
 
   const translations = {
     en: {
@@ -34,7 +64,9 @@ const ProfilePanel: React.FC = () => {
       twitter: 'Twitter URL',
       avatar: 'Avatar URL',
       save: 'Save Changes',
+      saving: 'Saving...',
       saved: 'Profile updated successfully!',
+      error: 'An error occurred. Please try again.',
       personal: 'Personal Info',
       social: 'Social Links',
       contact: 'Contact Info',
@@ -57,7 +89,9 @@ const ProfilePanel: React.FC = () => {
       twitter: 'رابط Twitter',
       avatar: 'رابط الصورة الشخصية',
       save: 'حفظ التغييرات',
+      saving: 'جاري الحفظ...',
       saved: 'تم تحديث الملف الشخصي بنجاح!',
+      error: 'حدث خطأ. حاول مرة أخرى.',
       personal: 'المعلومات الشخصية',
       social: 'روابط التواصل',
       contact: 'معلومات الاتصال',
@@ -66,12 +100,19 @@ const ProfilePanel: React.FC = () => {
 
   const texts = translations[language];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile(formData);
-    toast({
-      title: texts.saved,
-    });
+    setIsLoading(true);
+    try {
+      await updateProfile(formData);
+      toast({
+        title: texts.saved,
+      });
+    } catch (error) {
+      toast({ title: texts.error, variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (field: keyof Profile, value: string) => {
@@ -96,64 +137,73 @@ const ProfilePanel: React.FC = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">{texts.nameEn}</Label>
+              <Label htmlFor="name_en">{texts.nameEn}</Label>
               <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
+                id="name_en"
+                value={formData.name_en || ''}
+                onChange={(e) => handleChange('name_en', e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="nameAr">{texts.nameAr}</Label>
+              <Label htmlFor="name_ar">{texts.nameAr}</Label>
               <Input
-                id="nameAr"
-                value={formData.nameAr}
-                onChange={(e) => handleChange('nameAr', e.target.value)}
+                id="name_ar"
+                value={formData.name_ar || ''}
+                onChange={(e) => handleChange('name_ar', e.target.value)}
                 dir="rtl"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="title">{texts.titleEn}</Label>
+              <Label htmlFor="title_en">{texts.titleEn}</Label>
               <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleChange('title', e.target.value)}
+                id="title_en"
+                value={formData.title_en || ''}
+                onChange={(e) => handleChange('title_en', e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="titleAr">{texts.titleAr}</Label>
+              <Label htmlFor="title_ar">{texts.titleAr}</Label>
               <Input
-                id="titleAr"
-                value={formData.titleAr}
-                onChange={(e) => handleChange('titleAr', e.target.value)}
+                id="title_ar"
+                value={formData.title_ar || ''}
+                onChange={(e) => handleChange('title_ar', e.target.value)}
                 dir="rtl"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="bio">{texts.bioEn}</Label>
+              <Label htmlFor="bio_en">{texts.bioEn}</Label>
               <Textarea
-                id="bio"
-                value={formData.bio}
-                onChange={(e) => handleChange('bio', e.target.value)}
+                id="bio_en"
+                value={formData.bio_en || ''}
+                onChange={(e) => handleChange('bio_en', e.target.value)}
                 rows={3}
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="bioAr">{texts.bioAr}</Label>
+              <Label htmlFor="bio_ar">{texts.bioAr}</Label>
               <Textarea
-                id="bioAr"
-                value={formData.bioAr}
-                onChange={(e) => handleChange('bioAr', e.target.value)}
+                id="bio_ar"
+                value={formData.bio_ar || ''}
+                onChange={(e) => handleChange('bio_ar', e.target.value)}
                 rows={3}
                 dir="rtl"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="avatar">{texts.avatar}</Label>
+              <Label htmlFor="avatar_url">{texts.avatar}</Label>
               <Input
-                id="avatar"
-                value={formData.avatar || ''}
-                onChange={(e) => handleChange('avatar', e.target.value)}
+                id="avatar_url"
+                value={formData.avatar_url || ''}
+                onChange={(e) => handleChange('avatar_url', e.target.value)}
+                placeholder="https://..."
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="resume_url">{language === 'ar' ? 'رابط السيرة الذاتية' : 'Resume URL'}</Label>
+              <Input
+                id="resume_url"
+                value={formData.resume_url || ''}
+                onChange={(e) => handleChange('resume_url', e.target.value)}
                 placeholder="https://..."
               />
             </div>
@@ -176,7 +226,7 @@ const ProfilePanel: React.FC = () => {
                 <Input
                   id="email"
                   type="email"
-                  value={formData.email}
+                  value={formData.email || ''}
                   onChange={(e) => handleChange('email', e.target.value)}
                   className="pl-10"
                 />
@@ -188,32 +238,32 @@ const ProfilePanel: React.FC = () => {
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="phone"
-                  value={formData.phone}
+                  value={formData.phone || ''}
                   onChange={(e) => handleChange('phone', e.target.value)}
                   className="pl-10"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location">{texts.locationEn}</Label>
+              <Label htmlFor="location_en">{texts.locationEn}</Label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => handleChange('location', e.target.value)}
+                  id="location_en"
+                  value={formData.location_en || ''}
+                  onChange={(e) => handleChange('location_en', e.target.value)}
                   className="pl-10"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="locationAr">{texts.locationAr}</Label>
+              <Label htmlFor="location_ar">{texts.locationAr}</Label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="locationAr"
-                  value={formData.locationAr}
-                  onChange={(e) => handleChange('locationAr', e.target.value)}
+                  id="location_ar"
+                  value={formData.location_ar || ''}
+                  onChange={(e) => handleChange('location_ar', e.target.value)}
                   className="pl-10"
                   dir="rtl"
                 />
@@ -232,39 +282,39 @@ const ProfilePanel: React.FC = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="github">{texts.github}</Label>
+              <Label htmlFor="github_url">{texts.github}</Label>
               <div className="relative">
                 <Github className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="github"
-                  value={formData.github || ''}
-                  onChange={(e) => handleChange('github', e.target.value)}
+                  id="github_url"
+                  value={formData.github_url || ''}
+                  onChange={(e) => handleChange('github_url', e.target.value)}
                   className="pl-10"
                   placeholder="https://github.com/..."
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="linkedin">{texts.linkedin}</Label>
+              <Label htmlFor="linkedin_url">{texts.linkedin}</Label>
               <div className="relative">
                 <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="linkedin"
-                  value={formData.linkedin || ''}
-                  onChange={(e) => handleChange('linkedin', e.target.value)}
+                  id="linkedin_url"
+                  value={formData.linkedin_url || ''}
+                  onChange={(e) => handleChange('linkedin_url', e.target.value)}
                   className="pl-10"
                   placeholder="https://linkedin.com/in/..."
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="twitter">{texts.twitter}</Label>
+              <Label htmlFor="twitter_url">{texts.twitter}</Label>
               <div className="relative">
                 <Twitter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="twitter"
-                  value={formData.twitter || ''}
-                  onChange={(e) => handleChange('twitter', e.target.value)}
+                  id="twitter_url"
+                  value={formData.twitter_url || ''}
+                  onChange={(e) => handleChange('twitter_url', e.target.value)}
                   className="pl-10"
                   placeholder="https://twitter.com/..."
                 />
@@ -273,9 +323,9 @@ const ProfilePanel: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Button type="submit" className="btn-gradient gap-2">
+        <Button type="submit" className="btn-gradient gap-2" disabled={isLoading}>
           <Save className="h-4 w-4" />
-          {texts.save}
+          {isLoading ? texts.saving : texts.save}
         </Button>
       </form>
     </div>

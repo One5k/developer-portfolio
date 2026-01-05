@@ -1,17 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Github, Linkedin, Mail, Twitter } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { profileApi } from '@/lib/api';
 
 const Footer: React.FC = () => {
   const { language } = useLanguage();
   const currentYear = new Date().getFullYear();
+  const [profileData, setProfileData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const { profile } = await profileApi.getProfile();
+        setProfileData(profile);
+      } catch (error) {
+        console.error('Failed to fetch profile data in footer:', error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const socialLinks = [
-    { icon: Github, href: 'https://github.com', label: 'GitHub' },
-    { icon: Linkedin, href: 'https://linkedin.com', label: 'LinkedIn' },
-    { icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
-    { icon: Mail, href: 'mailto:hello@example.com', label: 'Email' },
-  ];
+    { icon: Github, href: profileData?.github_url, label: 'GitHub', show: !!profileData?.github_url },
+    { icon: Linkedin, href: profileData?.linkedin_url, label: 'LinkedIn', show: !!profileData?.linkedin_url },
+    { icon: Twitter, href: profileData?.twitter_url, label: 'Twitter', show: !!profileData?.twitter_url },
+    { icon: Mail, href: profileData?.email ? `mailto:${profileData.email}` : 'mailto:hello@example.com', label: 'Email', show: true },
+  ].filter(link => link.show);
 
   return (
     <footer className="relative mt-20 border-t border-border bg-card/50">

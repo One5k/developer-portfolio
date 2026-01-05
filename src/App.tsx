@@ -18,6 +18,8 @@ import ProjectsPanel from "./pages/admin/ProjectsPanel";
 import SkillsPanel from "./pages/admin/SkillsPanel";
 import CertificatesPanel from "./pages/admin/CertificatesPanel";
 import MessagesPanel from "./pages/admin/MessagesPanel";
+import ExperiencesPanel from "./pages/admin/ExperiencesPanel";
+import HomeContentPanel from "./pages/admin/HomeContentPanel";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -46,6 +48,8 @@ const App = () => (
                       <Route path="projects" element={<ProjectsPanel />} />
                       <Route path="skills" element={<SkillsPanel />} />
                       <Route path="certificates" element={<CertificatesPanel />} />
+                      <Route path="experiences" element={<ExperiencesPanel />} />
+                      <Route path="home-content" element={<HomeContentPanel />} />
                       <Route path="messages" element={<MessagesPanel />} />
                     </Route>
                     <Route path="*" element={<NotFound />} />

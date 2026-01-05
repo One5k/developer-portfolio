@@ -1,26 +1,22 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { authApi, getAuthToken, removeAuthToken } from '@/lib/api';
 
 interface User {
-  id: string;
+  id: number;
+  username: string;
   email: string;
-  name: string;
+  role: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Demo credentials - In production, use proper authentication with Lovable Cloud
-const DEMO_CREDENTIALS = {
-  email: 'admin@portfolio.com',
-  password: 'admin123',
-};
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -28,42 +24,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     // Check for existing session
-    const savedUser = localStorage.getItem('portfolio-admin-user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        localStorage.removeItem('portfolio-admin-user');
+    const checkAuth = async () => {
+      const token = getAuthToken();
+      if (token) {
+        try {
+          const { user: userData } = await authApi.getMe();
+          setUser(userData);
+        } catch (error) {
+          console.error('Session validation failed:', error);
+          removeAuthToken();
+        }
       }
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (username: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    if (email === DEMO_CREDENTIALS.email && password === DEMO_CREDENTIALS.password) {
-      const newUser: User = {
-        id: '1',
-        email: email,
-        name: 'Admin',
-      };
-      setUser(newUser);
-      localStorage.setItem('portfolio-admin-user', JSON.stringify(newUser));
+    try {
+      const { user: userData } = await authApi.login(username, password);
+      setUser(userData);
       setIsLoading(false);
       return { success: true };
+    } catch (error: any) {
+      setIsLoading(false);
+      return { 
+        success: false, 
+        error: error.message || 'Invalid credentials' 
+      };
     }
-    
-    setIsLoading(false);
-    return { success: false, error: 'Invalid email or password' };
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('portfolio-admin-user');
+    authApi.logout();
   };
 
   return (
@@ -86,3 +83,4 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+

@@ -21,6 +21,7 @@ const CertificatesPanel: React.FC = () => {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCertificate, setEditingCertificate] = useState<Certificate | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const initialFormData = {
     title: '',
@@ -29,7 +30,6 @@ const CertificatesPanel: React.FC = () => {
     issuerAr: '',
     date: '',
     credentialUrl: '',
-    image: '',
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -46,13 +46,14 @@ const CertificatesPanel: React.FC = () => {
       issuerAr: 'Issuer (Arabic)',
       date: 'Date',
       credentialUrl: 'Credential URL',
-      image: 'Certificate Image URL',
       save: 'Save',
+      saving: 'Saving...',
       cancel: 'Cancel',
       delete: 'Delete',
       deleteConfirm: 'Are you sure you want to delete this certificate?',
       saved: 'Certificate saved successfully!',
       deleted: 'Certificate deleted successfully!',
+      error: 'An error occurred. Please try again.',
       noCertificates: 'No certificates yet. Add your first certificate!',
       viewCredential: 'View Credential',
     },
@@ -67,13 +68,14 @@ const CertificatesPanel: React.FC = () => {
       issuerAr: 'الجهة المانحة (عربي)',
       date: 'التاريخ',
       credentialUrl: 'رابط الشهادة',
-      image: 'رابط صورة الشهادة',
       save: 'حفظ',
+      saving: 'جاري الحفظ...',
       cancel: 'إلغاء',
       delete: 'حذف',
       deleteConfirm: 'هل أنت متأكد من حذف هذه الشهادة؟',
       saved: 'تم حفظ الشهادة بنجاح!',
       deleted: 'تم حذف الشهادة بنجاح!',
+      error: 'حدث خطأ. حاول مرة أخرى.',
       noCertificates: 'لا توجد شهادات بعد. أضف أول شهادة!',
       viewCredential: 'عرض الشهادة',
     },
@@ -90,36 +92,47 @@ const CertificatesPanel: React.FC = () => {
   const openEditDialog = (certificate: Certificate) => {
     setEditingCertificate(certificate);
     setFormData({
-      title: certificate.title,
-      titleAr: certificate.titleAr,
-      issuer: certificate.issuer,
-      issuerAr: certificate.issuerAr,
-      date: certificate.date,
-      credentialUrl: certificate.credentialUrl || '',
-      image: certificate.image || '',
+      title: certificate.title_en,
+      titleAr: certificate.title_ar,
+      issuer: certificate.issuer_en,
+      issuerAr: certificate.issuer_ar,
+      date: certificate.issue_date,
+      credentialUrl: certificate.credential_url || '',
     });
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingCertificate) {
-      updateCertificate(editingCertificate.id, formData);
-    } else {
-      addCertificate(formData);
+    setIsLoading(true);
+    try {
+      if (editingCertificate) {
+        await updateCertificate(editingCertificate.id, formData);
+      } else {
+        await addCertificate(formData);
+      }
+      setIsDialogOpen(false);
+      toast({ title: texts.saved });
+    } catch (error) {
+      toast({ title: texts.error, variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
     }
-    setIsDialogOpen(false);
-    toast({ title: texts.saved });
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm(texts.deleteConfirm)) {
-      deleteCertificate(id);
-      toast({ title: texts.deleted });
+      try {
+        await deleteCertificate(id);
+        toast({ title: texts.deleted });
+      } catch (error) {
+        toast({ title: texts.error, variant: 'destructive' });
+      }
     }
   };
 
   const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
     const [year, month] = dateStr.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
     return date.toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', {
@@ -208,21 +221,12 @@ const CertificatesPanel: React.FC = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>{texts.image}</Label>
-                <Input
-                  value={formData.image}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                  placeholder="https://..."
-                />
-              </div>
-
               <div className="flex gap-2 justify-end">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   {texts.cancel}
                 </Button>
-                <Button type="submit" className="btn-gradient">
-                  {texts.save}
+                <Button type="submit" className="btn-gradient" disabled={isLoading}>
+                  {isLoading ? texts.saving : texts.save}
                 </Button>
               </div>
             </form>
@@ -241,37 +245,27 @@ const CertificatesPanel: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {certificates.map((certificate) => (
             <Card key={certificate.id} className="glass-card border-border/50 overflow-hidden group">
-              <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20">
-                {certificate.image ? (
-                  <img
-                    src={certificate.image}
-                    alt={language === 'ar' ? certificate.titleAr : certificate.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Award className="h-16 w-16 text-primary/50" />
-                  </div>
-                )}
+              <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                <Award className="h-16 w-16 text-primary/50" />
               </div>
               <CardContent className="p-4">
                 <h3 className="font-semibold">
-                  {language === 'ar' ? certificate.titleAr : certificate.title}
+                  {language === 'ar' ? certificate.title_ar : certificate.title_en}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {language === 'ar' ? certificate.issuerAr : certificate.issuer}
+                  {language === 'ar' ? certificate.issuer_ar : certificate.issuer_en}
                 </p>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
                   <Calendar className="h-3 w-3" />
-                  {formatDate(certificate.date)}
+                  {formatDate(certificate.issue_date)}
                 </div>
                 <div className="flex gap-2 mt-4">
-                  {certificate.credentialUrl && (
+                  {certificate.credential_url && (
                     <Button
                       size="sm"
                       variant="outline"
                       className="flex-1"
-                      onClick={() => window.open(certificate.credentialUrl, '_blank')}
+                      onClick={() => window.open(certificate.credential_url, '_blank')}
                     >
                       <ExternalLink className="h-3 w-3 mr-1" />
                       {texts.viewCredential}

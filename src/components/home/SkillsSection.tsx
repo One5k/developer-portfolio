@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Code, Server, Smartphone, Wrench, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { skillsApi } from '@/lib/api';
 
 interface SkillCategory {
   icon: React.ElementType;
@@ -10,51 +11,49 @@ interface SkillCategory {
 
 const SkillsSection: React.FC = () => {
   const { t, language } = useLanguage();
+  const [skills, setSkills] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+        try {
+            const { skills } = await skillsApi.getAll();
+            setSkills(skills);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    fetchSkills();
+  }, []);
+
+  // Helper to categorize skills dynamically
+  const getSkillsByCategory = (category: string) => {
+    return skills
+        .filter(s => s.category === category)
+        .map(s => ({ name: s.name_en, level: s.proficiency }));
+  };
 
   const categories: SkillCategory[] = [
     {
       icon: Code,
       title: { en: 'Frontend', ar: 'الواجهة الأمامية' },
-      skills: [
-        { name: 'React / Next.js', level: 95 },
-        { name: 'TypeScript', level: 92 },
-        { name: 'Tailwind CSS', level: 90 },
-        { name: 'Vue.js', level: 75 },
-        { name: 'HTML5 / CSS3', level: 95 },
-      ],
+      skills: getSkillsByCategory('frontend'),
     },
     {
       icon: Server,
       title: { en: 'Backend', ar: 'الخلفية' },
-      skills: [
-        { name: 'Node.js / Express', level: 88 },
-        { name: 'Python / FastAPI', level: 82 },
-        { name: 'PostgreSQL', level: 85 },
-        { name: 'MongoDB', level: 78 },
-        { name: 'GraphQL', level: 75 },
-      ],
+      skills: getSkillsByCategory('backend'),
     },
     {
       icon: Smartphone,
       title: { en: 'Mobile', ar: 'تطبيقات الجوال' },
-      skills: [
-        { name: 'React Native', level: 85 },
-        { name: 'Flutter', level: 70 },
-        { name: 'iOS (Swift)', level: 60 },
-        { name: 'Android (Kotlin)', level: 55 },
-      ],
+      skills: getSkillsByCategory('mobile'),
     },
     {
       icon: Wrench,
       title: { en: 'Tools & DevOps', ar: 'الأدوات و DevOps' },
-      skills: [
-        { name: 'Git / GitHub', level: 95 },
-        { name: 'Docker', level: 82 },
-        { name: 'AWS / Vercel', level: 78 },
-        { name: 'CI/CD Pipelines', level: 75 },
-        { name: 'Linux', level: 80 },
-      ],
+      skills: getSkillsByCategory('tools'),
     },
+    // Retaining hardcoded soft skills as they might not be in DB or handled differently
     {
       icon: Users,
       title: { en: 'Soft Skills', ar: 'المهارات الشخصية' },
@@ -67,6 +66,9 @@ const SkillsSection: React.FC = () => {
       ],
     },
   ];
+
+  // Filter out empty categories except soft skills
+  const activeCategories = categories.filter(c => c.skills.length > 0 || c.title.en === 'Soft Skills');
 
   return (
     <section id="skills" className="py-20 relative">
@@ -85,7 +87,7 @@ const SkillsSection: React.FC = () => {
 
         {/* Skills Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {categories.map((category, catIndex) => (
+          {activeCategories.map((category, catIndex) => (
             <div 
               key={category.title.en}
               className="glass-card rounded-2xl p-6 animate-fade-in hover:scale-[1.02] transition-transform duration-300"
@@ -129,13 +131,13 @@ const SkillsSection: React.FC = () => {
             {language === 'ar' ? 'التقنيات التي أعمل بها' : 'Technologies I Work With'}
           </h3>
           <div className="flex flex-wrap justify-center gap-4">
-            {['React', 'TypeScript', 'Node.js', 'Python', 'PostgreSQL', 'MongoDB', 'Docker', 'AWS', 'Tailwind', 'GraphQL', 'Redis', 'Git'].map((tech, index) => (
+            {skills.map((skill, index) => (
               <span 
-                key={tech}
+                key={skill.id || index}
                 className="px-6 py-3 glass-card rounded-full font-medium hover:bg-primary/10 hover:text-primary transition-colors duration-200 cursor-default"
                 style={{ animationDelay: `${0.5 + index * 0.05}s` }}
               >
-                {tech}
+                {skill.name_en}
               </span>
             ))}
           </div>

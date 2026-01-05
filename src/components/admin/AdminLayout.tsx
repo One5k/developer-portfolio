@@ -23,15 +23,21 @@ import { Badge } from '@/components/ui/badge';
 import {
   LayoutDashboard,
   User,
-  FolderKanban,
+  FolderOpen,
   Lightbulb,
+  MessageSquare,
   Award,
-  Mail,
+  Menu,
+  X,
   LogOut,
   Moon,
   Sun,
   Globe,
+  Mail,
+  Grid,
   Home,
+  Briefcase,
+  LayoutTemplate
 } from 'lucide-react';
 
 const AdminLayout: React.FC = () => {
@@ -42,7 +48,7 @@ const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const unreadCount = messages.filter(m => !m.read).length;
+  const unreadCount = messages.filter(m => !m.is_read).length;
 
   const translations = {
     en: {
@@ -50,6 +56,8 @@ const AdminLayout: React.FC = () => {
       profile: 'Profile',
       projects: 'Projects',
       skills: 'Skills',
+      homeContent: 'Home Content',
+      experiences: 'Experience',
       certificates: 'Certificates',
       messages: 'Messages',
       logout: 'Logout',
@@ -62,6 +70,8 @@ const AdminLayout: React.FC = () => {
       profile: 'الملف الشخصي',
       projects: 'المشاريع',
       skills: 'المهارات',
+      homeContent: 'محتوى الرئيسية',
+      experiences: 'الخبرات',
       certificates: 'الشهادات',
       messages: 'الرسائل',
       logout: 'تسجيل الخروج',
@@ -76,8 +86,10 @@ const AdminLayout: React.FC = () => {
   const menuItems = [
     { title: texts.dashboard, url: '/admin', icon: LayoutDashboard },
     { title: texts.profile, url: '/admin/profile', icon: User },
-    { title: texts.projects, url: '/admin/projects', icon: FolderKanban },
+    { title: texts.homeContent, url: '/admin/home-content', icon: LayoutTemplate },
+    { title: texts.projects, url: '/admin/projects', icon: FolderOpen },
     { title: texts.skills, url: '/admin/skills', icon: Lightbulb },
+    { title: texts.experiences, url: '/admin/experiences', icon: Briefcase },
     { title: texts.certificates, url: '/admin/certificates', icon: Award },
     { title: texts.messages, url: '/admin/messages', icon: Mail, badge: unreadCount },
   ];

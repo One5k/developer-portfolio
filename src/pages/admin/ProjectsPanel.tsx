@@ -32,6 +32,7 @@ const ProjectsPanel: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [techInput, setTechInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const initialFormData = {
     title: '',
@@ -39,7 +40,7 @@ const ProjectsPanel: React.FC = () => {
     description: '',
     descriptionAr: '',
     image: '',
-    category: 'frontend' as const,
+    category: 'frontend' as 'frontend' | 'backend' | 'fullstack' | 'mobile',
     technologies: [] as string[],
     liveUrl: '',
     githubUrl: '',
@@ -66,11 +67,13 @@ const ProjectsPanel: React.FC = () => {
       githubUrl: 'GitHub URL',
       featured: 'Featured Project',
       save: 'Save',
+      saving: 'Saving...',
       cancel: 'Cancel',
       delete: 'Delete',
       deleteConfirm: 'Are you sure you want to delete this project?',
       saved: 'Project saved successfully!',
       deleted: 'Project deleted successfully!',
+      error: 'An error occurred. Please try again.',
       noProjects: 'No projects yet. Add your first project!',
       categories: {
         frontend: 'Frontend',
@@ -96,11 +99,13 @@ const ProjectsPanel: React.FC = () => {
       githubUrl: 'رابط GitHub',
       featured: 'مشروع مميز',
       save: 'حفظ',
+      saving: 'جاري الحفظ...',
       cancel: 'إلغاء',
       delete: 'حذف',
       deleteConfirm: 'هل أنت متأكد من حذف هذا المشروع؟',
       saved: 'تم حفظ المشروع بنجاح!',
       deleted: 'تم حذف المشروع بنجاح!',
+      error: 'حدث خطأ. حاول مرة أخرى.',
       noProjects: 'لا توجد مشاريع بعد. أضف أول مشروع!',
       categories: {
         frontend: 'واجهة أمامية',
@@ -122,35 +127,46 @@ const ProjectsPanel: React.FC = () => {
   const openEditDialog = (project: Project) => {
     setEditingProject(project);
     setFormData({
-      title: project.title,
-      titleAr: project.titleAr,
-      description: project.description,
-      descriptionAr: project.descriptionAr,
-      image: project.image,
-      category: project.category as typeof initialFormData.category,
+      title: project.title_en,
+      titleAr: project.title_ar,
+      description: project.description_en,
+      descriptionAr: project.description_ar,
+      image: project.image_url,
+      category: project.category,
       technologies: [...project.technologies],
-      liveUrl: project.liveUrl || '',
-      githubUrl: project.githubUrl || '',
-      featured: project.featured,
+      liveUrl: project.live_url || '',
+      githubUrl: project.github_url || '',
+      featured: project.is_featured,
     });
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingProject) {
-      updateProject(editingProject.id, formData);
-    } else {
-      addProject(formData);
+    setIsLoading(true);
+    try {
+      if (editingProject) {
+        await updateProject(editingProject.id, formData);
+      } else {
+        await addProject(formData);
+      }
+      setIsDialogOpen(false);
+      toast({ title: texts.saved });
+    } catch (error) {
+      toast({ title: texts.error, variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
     }
-    setIsDialogOpen(false);
-    toast({ title: texts.saved });
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm(texts.deleteConfirm)) {
-      deleteProject(id);
-      toast({ title: texts.deleted });
+      try {
+        await deleteProject(id);
+        toast({ title: texts.deleted });
+      } catch (error) {
+        toast({ title: texts.error, variant: 'destructive' });
+      }
     }
   };
 
@@ -317,8 +333,8 @@ const ProjectsPanel: React.FC = () => {
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   {texts.cancel}
                 </Button>
-                <Button type="submit" className="btn-gradient">
-                  {texts.save}
+                <Button type="submit" className="btn-gradient" disabled={isLoading}>
+                  {isLoading ? texts.saving : texts.save}
                 </Button>
               </div>
             </form>
@@ -338,10 +354,10 @@ const ProjectsPanel: React.FC = () => {
           {projects.map((project) => (
             <Card key={project.id} className="glass-card border-border/50 overflow-hidden group">
               <div className="aspect-video relative overflow-hidden bg-muted">
-                {project.image ? (
+                {project.image_url ? (
                   <img
-                    src={project.image}
-                    alt={language === 'ar' ? project.titleAr : project.title}
+                    src={project.image_url}
+                    alt={language === 'ar' ? project.title_ar : project.title_en}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
@@ -349,7 +365,7 @@ const ProjectsPanel: React.FC = () => {
                     <FolderKanban className="h-12 w-12 text-muted-foreground" />
                   </div>
                 )}
-                {project.featured && (
+                {project.is_featured && (
                   <Badge className="absolute top-2 right-2 bg-primary">
                     <Star className="h-3 w-3 mr-1" />
                     Featured
@@ -358,10 +374,10 @@ const ProjectsPanel: React.FC = () => {
               </div>
               <CardContent className="p-4">
                 <h3 className="font-semibold truncate">
-                  {language === 'ar' ? project.titleAr : project.title}
+                  {language === 'ar' ? project.title_ar : project.title_en}
                 </h3>
                 <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                  {language === 'ar' ? project.descriptionAr : project.description}
+                  {language === 'ar' ? project.description_ar : project.description_en}
                 </p>
                 <div className="flex flex-wrap gap-1 mt-3">
                   {project.technologies.slice(0, 3).map((tech) => (

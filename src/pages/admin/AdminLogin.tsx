@@ -16,7 +16,7 @@ const AdminLogin: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -25,7 +25,7 @@ const AdminLogin: React.FC = () => {
     e.preventDefault();
     setError('');
 
-    const result = await login(email, password);
+    const result = await login(username, password);
     if (result.success) {
       navigate('/admin');
     } else {
@@ -37,26 +37,26 @@ const AdminLogin: React.FC = () => {
     en: {
       title: 'Admin Login',
       description: 'Enter your credentials to access the dashboard',
-      email: 'Email',
+      username: 'Username',
       password: 'Password',
       login: 'Sign In',
       loggingIn: 'Signing in...',
-      demo: 'Demo Credentials',
-      demoEmail: 'Email: admin@portfolio.com',
-      demoPassword: 'Password: admin123',
-      warning: 'This is a demo login. Enable Lovable Cloud for production-ready authentication.',
+      demo: 'Default Credentials',
+      demoUsername: 'Username: admin',
+      demoPassword: 'Password: Admin@123456',
+      warning: 'Change your password after first login for security.',
     },
     ar: {
       title: 'تسجيل دخول المدير',
       description: 'أدخل بياناتك للوصول إلى لوحة التحكم',
-      email: 'البريد الإلكتروني',
+      username: 'اسم المستخدم',
       password: 'كلمة المرور',
       login: 'تسجيل الدخول',
       loggingIn: 'جاري تسجيل الدخول...',
-      demo: 'بيانات تجريبية',
-      demoEmail: 'البريد: admin@portfolio.com',
-      demoPassword: 'كلمة المرور: admin123',
-      warning: 'هذا تسجيل دخول تجريبي. قم بتفعيل Lovable Cloud للحصول على مصادقة جاهزة للإنتاج.',
+      demo: 'بيانات افتراضية',
+      demoUsername: 'اسم المستخدم: admin',
+      demoPassword: 'كلمة المرور: Admin@123456',
+      warning: 'غيّر كلمة المرور بعد أول تسجيل دخول للأمان.',
     },
   };
 
@@ -114,7 +114,7 @@ const AdminLogin: React.FC = () => {
           {/* Demo Credentials Info */}
           <div className="mb-6 p-4 rounded-lg bg-muted/50 border border-border">
             <p className="text-sm font-medium text-muted-foreground mb-2">{texts.demo}:</p>
-            <p className="text-xs text-muted-foreground font-mono">{texts.demoEmail}</p>
+            <p className="text-xs text-muted-foreground font-mono">{texts.demoUsername}</p>
             <p className="text-xs text-muted-foreground font-mono">{texts.demoPassword}</p>
           </div>
 
@@ -126,15 +126,15 @@ const AdminLogin: React.FC = () => {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">{texts.email}</Label>
+              <Label htmlFor="username">{texts.username}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@portfolio.com"
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="admin"
                   className="pl-10"
                   required
                 />

@@ -7,10 +7,7 @@ import {
   Lightbulb, 
   Award, 
   Mail, 
-  TrendingUp,
-  Eye,
   MessageSquare,
-  CheckCircle,
 } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
@@ -56,7 +53,7 @@ const AdminDashboard: React.FC = () => {
       value: projects.length,
       icon: FolderKanban,
       color: 'from-blue-500 to-purple-500',
-      subValue: `${projects.filter(p => p.featured).length} ${texts.featured}`,
+      subValue: `${projects.filter(p => p.is_featured).length} ${texts.featured}`,
     },
     {
       title: texts.skills,
@@ -77,11 +74,11 @@ const AdminDashboard: React.FC = () => {
       value: messages.length,
       icon: Mail,
       color: 'from-pink-500 to-red-500',
-      subValue: `${messages.filter(m => !m.read).length} ${texts.unread}`,
+      subValue: `${messages.filter(m => !m.is_read).length} ${texts.unread}`,
     },
   ];
 
-  const recentMessages = messages.slice(0, 5);
+  const recentMessages = messages.sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -128,7 +125,7 @@ const AdminDashboard: React.FC = () => {
                 <div 
                   key={message.id} 
                   className={`p-4 rounded-lg border transition-colors ${
-                    message.read 
+                    message.is_read 
                       ? 'bg-muted/30 border-border/50' 
                       : 'bg-primary/5 border-primary/20'
                   }`}
@@ -136,19 +133,18 @@ const AdminDashboard: React.FC = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium truncate">{message.name}</p>
-                        {!message.read && (
+                        <p className="font-medium truncate">{message.sender_name}</p>
+                        {!message.is_read && (
                           <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">{message.email}</p>
-                      <p className="text-sm font-medium mt-1">{message.subject}</p>
+                      <p className="text-sm text-muted-foreground truncate">{message.sender_email}</p>
                       <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                        {message.message}
+                        {message.content}
                       </p>
                     </div>
                     <div className="text-xs text-muted-foreground flex-shrink-0">
-                      {new Date(message.createdAt).toLocaleDateString()}
+                      {new Date(message.created_at).toLocaleDateString()}
                     </div>
                   </div>
                 </div>

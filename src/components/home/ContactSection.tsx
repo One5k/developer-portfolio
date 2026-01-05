@@ -1,21 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Send, Mail, MapPin, Phone, Github, Linkedin, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { messagesApi, profileApi } from '@/lib/api';
 
 const ContactSection: React.FC = () => {
   const { t, language } = useLanguage();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [profileData, setProfileData] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
     message: '',
   });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const { profile } = await profileApi.getProfile();
+        setProfileData(profile);
+      } catch (error) {
+        console.error('Failed to fetch profile data:', error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,29 +39,57 @@ const ContactSection: React.FC = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission (will be replaced with Supabase later)
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+        await messagesApi.create({
+            sender_name: formData.name,
+            sender_email: formData.email,
+            content: `${formData.subject ? `[${formData.subject}] ` : ''}${formData.message}`
+        });
 
-    toast({
-      title: language === 'ar' ? 'تم الإرسال!' : 'Message Sent!',
-      description: t('contact.success'),
-    });
+        toast({
+            title: language === 'ar' ? 'تم الإرسال!' : 'Message Sent!',
+            description: t('contact.success'),
+        });
 
-    setFormData({ name: '', email: '', subject: '', message: '' });
-    setIsSubmitting(false);
+        setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+        console.error('Failed to send message:', error);
+        toast({
+            variant: "destructive",
+            title: language === 'ar' ? 'خطأ' : 'Error',
+            description: language === 'ar' ? 'فشل إرسال الرسالة. حاول مرة أخرى.' : 'Failed to send message. Please try again.',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
-    { icon: Mail, label: 'Email', value: 'hello@example.com', href: 'mailto:hello@example.com' },
-    { icon: Phone, label: language === 'ar' ? 'الهاتف' : 'Phone', value: '+1 234 567 890', href: 'tel:+1234567890' },
-    { icon: MapPin, label: language === 'ar' ? 'الموقع' : 'Location', value: language === 'ar' ? 'الرياض، السعودية' : 'Riyadh, Saudi Arabia', href: null },
+    { 
+      icon: Mail, 
+      label: 'Email', 
+      value: profileData?.email || 'hello@example.com', 
+      href: profileData?.email ? `mailto:${profileData.email}` : 'mailto:hello@example.com' 
+    },
+    { 
+      icon: Phone, 
+      label: language === 'ar' ? 'الهاتف' : 'Phone', 
+      value: profileData?.phone || '+1 234 567 890', 
+      href: profileData?.phone ? `tel:${profileData.phone}` : 'tel:+1234567890' 
+    },
+    { 
+      icon: MapPin, 
+      label: language === 'ar' ? 'الموقع' : 'Location', 
+      value: (language === 'ar' ? profileData?.location_ar : profileData?.location_en) || (language === 'ar' ? 'الرياض، السعودية' : 'Riyadh, Saudi Arabia'), 
+      href: null 
+    },
   ];
 
   const socialLinks = [
-    { icon: Github, label: 'GitHub', href: 'https://github.com' },
-    { icon: Linkedin, label: 'LinkedIn', href: 'https://linkedin.com' },
-    { icon: MessageCircle, label: 'WhatsApp', href: 'https://wa.me/1234567890' },
-  ];
+    { icon: Github, label: 'GitHub', href: profileData?.github_url },
+    { icon: Linkedin, label: 'LinkedIn', href: profileData?.linkedin_url },
+    { icon: MessageCircle, label: 'WhatsApp', href: profileData?.phone ? `https://wa.me/${profileData.phone.replace(/[^0-9]/g, '')}` : 'https://wa.me/1234567890' },
+  ].filter(link => link.href);
 
   return (
     <section id="contact" className="py-20 relative">
@@ -186,7 +228,7 @@ const ContactSection: React.FC = () => {
               asChild
               className="w-full bg-green-500 hover:bg-green-600 text-white rounded-full gap-2"
             >
-              <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer">
+              <a href={profileData?.phone ? `https://wa.me/${profileData.phone.replace(/[^0-9]/g, '')}` : 'https://wa.me/1234567890'} target="_blank" rel="noopener noreferrer">
                 <MessageCircle className="h-5 w-5" />
                 {language === 'ar' ? 'تواصل عبر واتساب' : 'Chat on WhatsApp'}
               </a>

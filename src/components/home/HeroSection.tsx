@@ -1,11 +1,61 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Github, Linkedin, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { heroApi, profileApi } from '@/lib/api';
 
 const HeroSection: React.FC = () => {
-  const { t, direction } = useLanguage();
+  const { t, language, direction } = useLanguage();
+  const [heroData, setHeroData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [heroRes, profileRes] = await Promise.all([
+          heroApi.getHero(),
+          profileApi.getProfile()
+        ]);
+        setHeroData(heroRes.hero);
+        setProfileData(profileRes.profile);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Fallback to defaults if loading or error, but ideally valid seed data should be present
+  const greeting = heroData 
+    ? (language === 'ar' ? heroData.greeting_ar : heroData.greeting_en)
+    : t('home.greeting');
+    
+  const title = heroData 
+    ? (language === 'ar' ? heroData.title_ar : heroData.title_en)
+    : t('home.name');
+
+  const subtitle = heroData
+    ? (language === 'ar' ? heroData.subtitle_ar : heroData.subtitle_en)
+    : t('home.title');
+
+  const description = heroData
+    ? (language === 'ar' ? heroData.description_ar : heroData.description_en)
+    : t('home.bio');
+    
+  // Combined social links from profile data
+  const socialLinks = [
+    { 
+      icon: Github, 
+      href: profileData?.github_url, 
+      show: !!profileData?.github_url 
+    },
+    { 
+      icon: Linkedin, 
+      href: profileData?.linkedin_url, 
+      show: !!profileData?.linkedin_url 
+    }
+  ].filter(link => link.show);
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -22,25 +72,25 @@ const HeroSection: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           {/* Greeting */}
           <p className="text-lg md:text-xl text-muted-foreground mb-4 animate-fade-in">
-            {t('home.greeting')}
+            {greeting}
           </p>
 
-          {/* Name */}
+          {/* Name/Title */}
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <span className="gradient-text">{t('home.name')}</span>
+            <span className="gradient-text">{title}</span>
           </h1>
 
-          {/* Title with Typing Effect */}
+          {/* Subtitle with Typing Effect */}
           <div className="mb-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <span className="inline-block px-4 py-2 rounded-full glass-card text-lg md:text-xl font-mono text-primary">
-              {'>'} {t('home.title')}
+              {'>'} {subtitle}
               <span className="animate-blink">_</span>
             </span>
           </div>
 
-          {/* Subtitle */}
+          {/* Description */}
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.3s' }}>
-            {t('home.bio')}
+            {description}
           </p>
 
           {/* CTA Buttons */}
@@ -68,24 +118,21 @@ const HeroSection: React.FC = () => {
           </div>
 
           {/* Social Links */}
-          <div className="flex items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-3 rounded-full glass-card text-muted-foreground hover:text-primary hover:glow-primary transition-all duration-300"
-            >
-              <Github className="h-6 w-6" />
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-3 rounded-full glass-card text-muted-foreground hover:text-primary hover:glow-primary transition-all duration-300"
-            >
-              <Linkedin className="h-6 w-6" />
-            </a>
-          </div>
+          {socialLinks.length > 0 && (
+            <div className="flex items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+              {socialLinks.map((social, index) => (
+                <a
+                  key={index}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 rounded-full glass-card text-muted-foreground hover:text-primary hover:glow-primary transition-all duration-300"
+                >
+                  <social.icon className="h-6 w-6" />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Scroll Indicator */}

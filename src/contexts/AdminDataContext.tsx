@@ -1,314 +1,521 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { projectsApi, skillsApi, certificatesApi, messagesApi, profileApi, experiencesApi, heroApi, aboutApi } from '@/lib/api';
 
 export interface Project {
   id: string;
-  title: string;
-  titleAr: string;
-  description: string;
-  descriptionAr: string;
-  image: string;
+  title_en: string;
+  title_ar: string;
+  description_en: string;
+  description_ar: string;
+  image_url: string;
   category: 'frontend' | 'backend' | 'fullstack' | 'mobile';
   technologies: string[];
-  liveUrl?: string;
-  githubUrl?: string;
-  featured: boolean;
-  createdAt: string;
+  live_url?: string;
+  github_url?: string;
+  is_featured: boolean;
+  created_at: string;
 }
 
 export interface Skill {
   id: string;
-  name: string;
-  nameAr: string;
+  name_en: string;
+  name_ar: string;
   category: 'frontend' | 'backend' | 'mobile' | 'tools' | 'soft';
-  level: number;
-  icon?: string;
+  proficiency: number;
+  icon_name?: string;
+}
+
+export interface Experience {
+  id: string;
+  company_en: string;
+  company_ar: string;
+  position_en: string;
+  position_ar: string;
+  start_date: string;
+  end_date?: string;
+  description_en: string;
+  description_ar: string;
+  company_url?: string;
 }
 
 export interface Certificate {
   id: string;
-  title: string;
-  titleAr: string;
-  issuer: string;
-  issuerAr: string;
-  date: string;
-  credentialUrl?: string;
-  image?: string;
+  title_en: string;
+  title_ar: string;
+  issuer_en: string;
+  issuer_ar: string;
+  issue_date: string;
+  credential_url?: string;
 }
 
 export interface Message {
   id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  read: boolean;
-  createdAt: string;
+  sender_name: string;
+  sender_email: string;
+  content: string;
+  is_read: boolean;
+  created_at: string;
 }
 
 export interface Profile {
-  name: string;
-  nameAr: string;
-  title: string;
-  titleAr: string;
-  bio: string;
-  bioAr: string;
+  id: string;
+  user_id: string;
+  name_en: string;
+  name_ar: string;
+  title_en: string;
+  title_ar: string;
+  bio_en: string;
+  bio_ar: string;
+  created_at?: string;
+  updated_at?: string;
   email: string;
   phone: string;
-  location: string;
-  locationAr: string;
-  github?: string;
-  linkedin?: string;
-  twitter?: string;
-  avatar?: string;
+  location_en: string;
+  location_ar: string;
+  github_url?: string;
+  linkedin_url?: string;
+  twitter_url?: string;
+  resume_url?: string;
+  avatar_url?: string;
+}
+
+export interface HeroData {
+  greeting_en: string;
+  greeting_ar: string;
+  title_en: string;
+  title_ar: string;
+  subtitle_en: string;
+  subtitle_ar: string;
+  description_en: string;
+  description_ar: string;
+  hero_image_url: string;
+}
+
+export interface AboutData {
+  bio_en: string;
+  bio_ar: string;
+  years_of_experience: number;
+  completed_projects_count: number;
+  happy_clients_count: number;
 }
 
 interface AdminDataContextType {
   // Profile
-  profile: Profile;
-  updateProfile: (data: Partial<Profile>) => void;
+  profile: Profile | null;
+  updateProfile: (data: Partial<Profile>) => Promise<void>;
+
+  // Hero & About
+  hero: HeroData | null;
+  about: AboutData | null;
+  updateHero: (data: Partial<HeroData>) => Promise<void>;
+  updateAbout: (data: Partial<AboutData>) => Promise<void>;
   
   // Projects
   projects: Project[];
-  addProject: (project: Omit<Project, 'id' | 'createdAt'>) => void;
-  updateProject: (id: string, data: Partial<Project>) => void;
-  deleteProject: (id: string) => void;
+  loading: boolean;
+  addProject: (project: any) => Promise<void>;
+  updateProject: (id: string, data: any) => Promise<void>;
+  deleteProject: (id: string) => Promise<void>;
+  refreshProjects: () => Promise<void>;
   
   // Skills
   skills: Skill[];
-  addSkill: (skill: Omit<Skill, 'id'>) => void;
-  updateSkill: (id: string, data: Partial<Skill>) => void;
-  deleteSkill: (id: string) => void;
+  addSkill: (skill: any) => Promise<void>;
+  updateSkill: (id: string, data: any) => Promise<void>;
+  deleteSkill: (id: string) => Promise<void>;
+  refreshSkills: () => Promise<void>;
   
   // Certificates
   certificates: Certificate[];
-  addCertificate: (certificate: Omit<Certificate, 'id'>) => void;
-  updateCertificate: (id: string, data: Partial<Certificate>) => void;
-  deleteCertificate: (id: string) => void;
+  addCertificate: (certificate: any) => Promise<void>;
+  updateCertificate: (id: string, data: any) => Promise<void>;
+  deleteCertificate: (id: string) => Promise<void>;
+  refreshCertificates: () => Promise<void>;
   
   // Messages
   messages: Message[];
-  markMessageAsRead: (id: string) => void;
-  deleteMessage: (id: string) => void;
+  markMessageAsRead: (id: string) => Promise<void>;
+  deleteMessage: (id: string) => Promise<void>;
+  refreshMessages: () => Promise<void>;
+
+  // Experiences
+  experiences: Experience[];
+  addExperience: (experience: any) => Promise<void>;
+  updateExperience: (id: string, data: any) => Promise<void>;
+  deleteExperience: (id: string) => Promise<void>;
+  refreshExperiences: () => Promise<void>;
 }
-
-const defaultProfile: Profile = {
-  name: 'Your Name',
-  nameAr: 'اسمك هنا',
-  title: 'Full-Stack Developer',
-  titleAr: 'مطور ويب متكامل',
-  bio: 'I craft elegant solutions to complex problems, specializing in web development with a passion for clean code and intuitive user experiences.',
-  bioAr: 'أصمم حلولاً أنيقة للمشكلات المعقدة، متخصص في تطوير الويب مع شغف بالكود النظيف وتجربة المستخدم البديهية.',
-  email: 'hello@portfolio.com',
-  phone: '+1 234 567 890',
-  location: 'San Francisco, CA',
-  locationAr: 'سان فرانسيسكو، كاليفورنيا',
-  github: 'https://github.com',
-  linkedin: 'https://linkedin.com',
-  twitter: 'https://twitter.com',
-};
-
-const defaultProjects: Project[] = [
-  {
-    id: '1',
-    title: 'E-Commerce Platform',
-    titleAr: 'منصة تجارة إلكترونية',
-    description: 'A full-featured online store with cart, payments, and admin dashboard.',
-    descriptionAr: 'متجر إلكتروني متكامل مع سلة التسوق والدفع ولوحة التحكم.',
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800',
-    category: 'fullstack',
-    technologies: ['React', 'Node.js', 'MongoDB', 'Stripe'],
-    liveUrl: 'https://example.com',
-    githubUrl: 'https://github.com',
-    featured: true,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    title: 'Task Management App',
-    titleAr: 'تطبيق إدارة المهام',
-    description: 'A collaborative project management tool with real-time updates.',
-    descriptionAr: 'أداة إدارة مشاريع تعاونية مع تحديثات فورية.',
-    image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800',
-    category: 'frontend',
-    technologies: ['Vue.js', 'Firebase', 'Tailwind CSS'],
-    liveUrl: 'https://example.com',
-    featured: true,
-    createdAt: new Date().toISOString(),
-  },
-];
-
-const defaultSkills: Skill[] = [
-  { id: '1', name: 'React', nameAr: 'رياكت', category: 'frontend', level: 90 },
-  { id: '2', name: 'TypeScript', nameAr: 'تايب سكريبت', category: 'frontend', level: 85 },
-  { id: '3', name: 'Node.js', nameAr: 'نود جي إس', category: 'backend', level: 80 },
-  { id: '4', name: 'Python', nameAr: 'بايثون', category: 'backend', level: 75 },
-  { id: '5', name: 'React Native', nameAr: 'رياكت نيتف', category: 'mobile', level: 70 },
-  { id: '6', name: 'Git', nameAr: 'جيت', category: 'tools', level: 85 },
-];
-
-const defaultCertificates: Certificate[] = [
-  {
-    id: '1',
-    title: 'AWS Solutions Architect',
-    titleAr: 'مهندس حلول AWS',
-    issuer: 'Amazon Web Services',
-    issuerAr: 'أمازون ويب سيرفيسز',
-    date: '2024-01',
-    credentialUrl: 'https://aws.amazon.com',
-  },
-  {
-    id: '2',
-    title: 'Google Cloud Professional',
-    titleAr: 'محترف Google Cloud',
-    issuer: 'Google',
-    issuerAr: 'جوجل',
-    date: '2023-06',
-    credentialUrl: 'https://cloud.google.com',
-  },
-];
-
-const defaultMessages: Message[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-    subject: 'Project Inquiry',
-    message: 'Hi, I would like to discuss a potential project with you.',
-    read: false,
-    createdAt: new Date().toISOString(),
-  },
-];
 
 const AdminDataContext = createContext<AdminDataContextType | undefined>(undefined);
 
-const generateId = () => Math.random().toString(36).substr(2, 9);
-
 export const AdminDataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [profile, setProfile] = useState<Profile>(() => {
-    const saved = localStorage.getItem('portfolio-profile');
-    return saved ? JSON.parse(saved) : defaultProfile;
-  });
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [hero, setHero] = useState<HeroData | null>(null);
+  const [about, setAbout] = useState<AboutData | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [projects, setProjects] = useState<Project[]>(() => {
-    const saved = localStorage.getItem('portfolio-projects');
-    return saved ? JSON.parse(saved) : defaultProjects;
-  });
-
-  const [skills, setSkills] = useState<Skill[]>(() => {
-    const saved = localStorage.getItem('portfolio-skills');
-    return saved ? JSON.parse(saved) : defaultSkills;
-  });
-
-  const [certificates, setCertificates] = useState<Certificate[]>(() => {
-    const saved = localStorage.getItem('portfolio-certificates');
-    return saved ? JSON.parse(saved) : defaultCertificates;
-  });
-
-  const [messages, setMessages] = useState<Message[]>(() => {
-    const saved = localStorage.getItem('portfolio-messages');
-    return saved ? JSON.parse(saved) : defaultMessages;
-  });
-
-  // Persist to localStorage
-  useEffect(() => {
-    localStorage.setItem('portfolio-profile', JSON.stringify(profile));
-  }, [profile]);
-
-  useEffect(() => {
-    localStorage.setItem('portfolio-projects', JSON.stringify(projects));
-  }, [projects]);
-
-  useEffect(() => {
-    localStorage.setItem('portfolio-skills', JSON.stringify(skills));
-  }, [skills]);
-
-  useEffect(() => {
-    localStorage.setItem('portfolio-certificates', JSON.stringify(certificates));
-  }, [certificates]);
-
-  useEffect(() => {
-    localStorage.setItem('portfolio-messages', JSON.stringify(messages));
-  }, [messages]);
-
-  // Profile
-  const updateProfile = (data: Partial<Profile>) => {
-    setProfile(prev => ({ ...prev, ...data }));
-  };
-
-  // Projects
-  const addProject = (project: Omit<Project, 'id' | 'createdAt'>) => {
-    const newProject: Project = {
-      ...project,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
+  // Fetch all data on mount
+ useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        setLoading(true);
+        await Promise.all([
+          refreshProjects(),
+          refreshSkills(),
+          refreshExperiences(),
+          refreshCertificates(),
+          refreshMessages(),
+          refreshProfile(),
+          refreshHero(),
+          refreshAbout(),
+        ]);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
-    setProjects(prev => [...prev, newProject]);
+
+    fetchAllData();
+  }, []);
+
+  // Profile functions
+  const refreshProfile = async () => {
+    try {
+      const { profile: data } = await profileApi.getProfile();
+      setProfile(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
   };
 
-  const updateProject = (id: string, data: Partial<Project>) => {
-    setProjects(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+  const updateProfile = async (data: Partial<Profile>) => {
+    try {
+      const { profile: updated } = await profileApi.updateProfile(data);
+      setProfile(updated);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
   };
 
-  const deleteProject = (id: string) => {
-    setProjects(prev => prev.filter(p => p.id !== id));
+  // Hero functions
+  const refreshHero = async () => {
+    try {
+      const { hero: data } = await heroApi.getHero();
+      setHero(data);
+    } catch (error) {
+      console.error('Error fetching hero:', error);
+    }
   };
 
-  // Skills
-  const addSkill = (skill: Omit<Skill, 'id'>) => {
-    const newSkill: Skill = { ...skill, id: generateId() };
-    setSkills(prev => [...prev, newSkill]);
+  const updateHero = async (data: Partial<HeroData>) => {
+    try {
+      const { hero: updated } = await heroApi.updateHero(data);
+      setHero(updated);
+    } catch (error) {
+      console.error('Error updating hero:', error);
+      throw error;
+    }
   };
 
-  const updateSkill = (id: string, data: Partial<Skill>) => {
-    setSkills(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
+  // About functions
+  const refreshAbout = async () => {
+    try {
+      const { about: data } = await aboutApi.getAbout();
+      setAbout(data);
+    } catch (error) {
+      console.error('Error fetching about:', error);
+    }
   };
 
-  const deleteSkill = (id: string) => {
-    setSkills(prev => prev.filter(s => s.id !== id));
+  const updateAbout = async (data: Partial<AboutData>) => {
+    try {
+      const { about: updated } = await aboutApi.updateAbout(data);
+      setAbout(updated);
+    } catch (error) {
+      console.error('Error updating about:', error);
+      throw error;
+    }
   };
 
-  // Certificates
-  const addCertificate = (certificate: Omit<Certificate, 'id'>) => {
-    const newCertificate: Certificate = { ...certificate, id: generateId() };
-    setCertificates(prev => [...prev, newCertificate]);
+  // Projects functions
+  const refreshProjects = async () => {
+    try {
+      const { projects: data } = await projectsApi.getAll();
+      setProjects(data.map(p => ({ ...p, id: String(p.id) })));
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    }
   };
 
-  const updateCertificate = (id: string, data: Partial<Certificate>) => {
-    setCertificates(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
+  const addProject = async (project: any) => {
+    try {
+      await projectsApi.create({
+        title_en: project.title,
+        title_ar: project.titleAr,
+        description_en: project.description,
+        description_ar: project.descriptionAr,
+        category: project.category,
+        image_url: project.image,
+        live_url: project.liveUrl,
+        github_url: project.githubUrl,
+        is_featured: project.featured,
+        skill_ids: [], // Handle skill mapping if needed
+      });
+      await refreshProjects();
+    } catch (error) {
+      console.error('Error adding project:', error);
+      throw error;
+    }
   };
 
-  const deleteCertificate = (id: string) => {
-    setCertificates(prev => prev.filter(c => c.id !== id));
+  const updateProject = async (id: string, data: any) => {
+    try {
+      await projectsApi.update(id, {
+        title_en: data.title,
+        title_ar: data.titleAr,
+        description_en: data.description,
+        description_ar: data.descriptionAr,
+        category: data.category,
+        image_url: data.image,
+        live_url: data.liveUrl,
+        github_url: data.githubUrl,
+        is_featured: data.featured,
+      });
+      await refreshProjects();
+    } catch (error) {
+      console.error('Error updating project:', error);
+      throw error;
+    }
   };
 
-  // Messages
-  const markMessageAsRead = (id: string) => {
-    setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
+  const deleteProject = async (id: string) => {
+    try {
+      await projectsApi.delete(id);
+      await refreshProjects();
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      throw error;
+    }
   };
 
-  const deleteMessage = (id: string) => {
-    setMessages(prev => prev.filter(m => m.id !== id));
+  // Skills functions
+  const refreshSkills = async () => {
+    try {
+      const { skills: data } = await skillsApi.getAll();
+      setSkills(data.map(s => ({ ...s, id: String(s.id) })));
+    } catch (error) {
+      console.error('Error fetching skills:', error);
+    }
+  };
+
+  const addSkill = async (skill: any) => {
+    try {
+      await skillsApi.create({
+        name_en: skill.name,
+        name_ar: skill.nameAr,
+        category: skill.category,
+        proficiency: skill.level,
+        icon_name: skill.icon,
+      });
+      await refreshSkills();
+    } catch (error) {
+      console.error('Error adding skill:', error);
+      throw error;
+    }
+  };
+
+  const updateSkill = async (id: string, data: any) => {
+    try {
+      await skillsApi.update(id, {
+        name_en: data.name,
+        name_ar: data.nameAr,
+        category: data.category,
+        proficiency: data.level,
+        icon_name: data.icon,
+      });
+      await refreshSkills();
+    } catch (error) {
+      console.error('Error updating skill:', error);
+      throw error;
+    }
+  };
+
+  const deleteSkill = async (id: string) => {
+    try {
+      await skillsApi.delete(id);
+      await refreshSkills();
+    } catch (error) {
+      console.error('Error deleting skill:', error);
+      throw error;
+    }
+  };
+
+  // Experiences functions
+  const refreshExperiences = async () => {
+    try {
+      const { experiences: data } = await experiencesApi.getAll();
+      setExperiences(data.map(e => ({ ...e, id: String(e.id) })));
+    } catch (error) {
+      console.error('Error fetching experiences:', error);
+    }
+  };
+
+  const addExperience = async (experience: any) => {
+    try {
+      // Pass the payload directly since it's now formatted correctly in the component
+      await experiencesApi.create(experience);
+      await refreshExperiences();
+    } catch (error) {
+      console.error('Error adding experience:', error);
+      throw error;
+    }
+  };
+
+  const updateExperience = async (id: string, data: any) => {
+    try {
+      // Pass the payload directly
+      await experiencesApi.update(id, data);
+      await refreshExperiences();
+    } catch (error) {
+      console.error('Error updating experience:', error);
+      throw error;
+    }
+  };
+
+  const deleteExperience = async (id: string) => {
+    try {
+      await experiencesApi.delete(id);
+      await refreshExperiences();
+    } catch (error) {
+      console.error('Error deleting experience:', error);
+      throw error;
+    }
+  };
+
+  // Certificates functions
+  const refreshCertificates = async () => {
+    try {
+      const { certificates: data } = await certificatesApi.getAll();
+      setCertificates(data.map(c => ({ ...c, id: String(c.id) })));
+    } catch (error) {
+      console.error('Error fetching certificates:', error);
+    }
+  };
+
+  const addCertificate = async (certificate: any) => {
+    try {
+      await certificatesApi.create({
+        title_en: certificate.title,
+        title_ar: certificate.titleAr,
+        issuer_en: certificate.issuer,
+        issuer_ar: certificate.issuerAr,
+        issue_date: certificate.date,
+        credential_url: certificate.credentialUrl,
+      });
+      await refreshCertificates();
+    } catch (error) {
+      console.error('Error adding certificate:', error);
+      throw error;
+    }
+  };
+
+  const updateCertificate = async (id: string, data: any) => {
+    try {
+      await certificatesApi.update(id, {
+        title_en: data.title,
+        title_ar: data.titleAr,
+        issuer_en: data.issuer,
+        issuer_ar: data.issuerAr,
+        issue_date: data.date,
+        credential_url: data.credentialUrl,
+      });
+      await refreshCertificates();
+    } catch (error) {
+      console.error('Error updating certificate:', error);
+      throw error;
+    }
+  };
+
+  const deleteCertificate = async (id: string) => {
+    try {
+      await certificatesApi.delete(id);
+      await refreshCertificates();
+    } catch (error) {
+      console.error('Error deleting certificate:', error);
+      throw error;
+    }
+  };
+
+  // Messages functions
+  const refreshMessages = async () => {
+    try {
+      const { messages: data } = await messagesApi.getAll();
+      setMessages(data.map(m => ({ ...m, id: String(m.id) })));
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+
+  const markMessageAsRead = async (id: string) => {
+    try {
+      await messagesApi.markAsRead(id);
+      await refreshMessages();
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+      throw error;
+    }
+  };
+
+  const deleteMessage = async (id: string) => {
+    try {
+      await messagesApi.delete(id);
+      await refreshMessages();
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      throw error;
+    }
   };
 
   return (
     <AdminDataContext.Provider value={{
       profile,
       updateProfile,
+      hero,
+      about,
+      updateHero,
+      updateAbout,
       projects,
+      loading,
       addProject,
       updateProject,
       deleteProject,
+      refreshProjects,
       skills,
       addSkill,
       updateSkill,
       deleteSkill,
+      refreshSkills,
       certificates,
       addCertificate,
       updateCertificate,
       deleteCertificate,
+      refreshCertificates,
       messages,
       markMessageAsRead,
       deleteMessage,
+      refreshMessages,
+      experiences,
+      addExperience,
+      updateExperience,
+      deleteExperience,
+      refreshExperiences,
     }}>
       {children}
     </AdminDataContext.Provider>

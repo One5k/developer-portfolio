@@ -1,31 +1,43 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Download, Briefcase, Calendar, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { aboutApi, experiencesApi, profileApi } from '@/lib/api';
 
 const AboutSection: React.FC = () => {
   const { t, language, direction } = useLanguage();
+  const [aboutData, setAboutData] = useState<any>(null);
+  const [experiences, setExperiences] = useState<any[]>([]);
+  const [profileData, setProfileData] = useState<any>(null);
 
-  const experiences = [
-    {
-      title: { en: 'Senior Full-Stack Developer', ar: 'مطور ويب متكامل أول' },
-      company: { en: 'Tech Solutions Inc.', ar: 'شركة الحلول التقنية' },
-      period: '2022 - Present',
-      location: { en: 'Riyadh, Saudi Arabia', ar: 'الرياض، السعودية' },
-    },
-    {
-      title: { en: 'Full-Stack Developer', ar: 'مطور ويب متكامل' },
-      company: { en: 'Digital Agency', ar: 'وكالة رقمية' },
-      period: '2020 - 2022',
-      location: { en: 'Dubai, UAE', ar: 'دبي، الإمارات' },
-    },
-    {
-      title: { en: 'Frontend Developer', ar: 'مطور واجهات أمامية' },
-      company: { en: 'Startup Hub', ar: 'مركز الشركات الناشئة' },
-      period: '2018 - 2020',
-      location: { en: 'Amman, Jordan', ar: 'عمان، الأردن' },
-    },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [aboutRes, experiencesRes, profileRes] = await Promise.all([
+          aboutApi.getAbout(),
+          experiencesApi.getAll(),
+          profileApi.getProfile()
+        ]);
+        setAboutData(aboutRes.about);
+        setExperiences(experiencesRes.experiences);
+        setProfileData(profileRes.profile);
+      } catch (error) {
+        console.error('Failed to fetch about data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const bio = aboutData
+    ? (language === 'ar' ? aboutData.bio_ar : aboutData.bio_en)
+    : t('about.bio_placeholder'); // Fallback would be good
+
+  // Format date function
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return 'Present';
+    const date = new Date(dateStr);
+    return date.getFullYear().toString();
+  };
 
   return (
     <section id="about" className="py-20 relative">
@@ -49,19 +61,32 @@ const AboutSection: React.FC = () => {
               <h3 className="text-2xl font-bold mb-4">
                 {language === 'ar' ? 'من أنا' : 'Who I Am'}
               </h3>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                {language === 'ar' 
-                  ? 'أنا مطور ويب شغوف بخبرة تزيد عن 5 سنوات في بناء تطبيقات ويب حديثة. أركز على إنشاء واجهات مستخدم جميلة وتجارب سلسة باستخدام أحدث التقنيات.'
-                  : 'I am a passionate web developer with over 5 years of experience building modern web applications. I focus on creating beautiful user interfaces and seamless experiences using the latest technologies.'}
+              <p className="text-muted-foreground leading-relaxed mb-6 whitespace-pre-wrap">
+                {bio}
               </p>
-              <p className="text-muted-foreground leading-relaxed mb-8">
-                {language === 'ar'
-                  ? 'أحب حل المشكلات المعقدة وتحويل الأفكار إلى منتجات رقمية عملية. أؤمن بكتابة كود نظيف وقابل للصيانة.'
-                  : 'I love solving complex problems and turning ideas into functional digital products. I believe in writing clean, maintainable code.'}
-              </p>
-              <Button className="btn-gradient rounded-full gap-2">
-                <Download className="h-4 w-4" />
-                {t('about.download')}
+              
+              {aboutData && (
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                  <div className="text-center p-4 bg-muted/20 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{aboutData.years_of_experience}+</div>
+                    <div className="text-xs text-muted-foreground">{language === 'ar' ? 'سنوات خبرة' : 'Years Exp'}</div>
+                  </div>
+                  <div className="text-center p-4 bg-muted/20 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{aboutData.completed_projects_count}+</div>
+                    <div className="text-xs text-muted-foreground">{language === 'ar' ? 'مشاريع' : 'Projects'}</div>
+                  </div>
+                  <div className="text-center p-4 bg-muted/20 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{aboutData.happy_clients_count}+</div>
+                    <div className="text-xs text-muted-foreground">{language === 'ar' ? 'عملاء' : 'Clients'}</div>
+                  </div>
+                </div>
+              )}
+
+              <Button asChild className="btn-gradient rounded-full gap-2">
+                <a href={profileData?.resume_url} target="_blank" rel="noopener noreferrer">
+                  <Download className="h-4 w-4" />
+                  {t('about.download')}
+                </a>
               </Button>
             </div>
           </div>
@@ -74,7 +99,7 @@ const AboutSection: React.FC = () => {
             <div className={`space-y-6 relative before:absolute before:top-0 before:bottom-0 before:w-0.5 before:bg-primary/30 ${direction === 'rtl' ? 'before:right-3' : 'before:left-3'}`}>
               {experiences.map((exp, index) => (
                 <div 
-                  key={index}
+                  key={exp.id}
                   className={`relative glass-card rounded-xl p-5 ${direction === 'rtl' ? 'mr-8' : 'ml-8'}`}
                 >
                   <div className={`absolute top-6 w-6 h-6 rounded-full bg-primary flex items-center justify-center ${direction === 'rtl' ? '-right-11' : '-left-11'}`}>
@@ -82,16 +107,30 @@ const AboutSection: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                     <Calendar className="h-4 w-4" />
-                    <span>{exp.period}</span>
+                    <span>
+                      {formatDate(exp.start_date)} - {exp.end_date ? formatDate(exp.end_date) : (language === 'ar' ? 'الآن' : 'Present')}
+                    </span>
                   </div>
-                  <h4 className="text-lg font-bold">{exp.title[language]}</h4>
-                  <p className="text-primary font-medium">{exp.company[language]}</p>
+                  <h4 className="text-lg font-bold">
+                    {language === 'ar' ? exp.position_ar : exp.position_en}
+                  </h4>
+                  <p className="text-primary font-medium">
+                    {language === 'ar' ? exp.company_ar : exp.company_en}
+                  </p>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
                     <MapPin className="h-3 w-3" />
-                    <span>{exp.location[language]}</span>
+                    <span>{t('about.view_more') || 'View Details'}</span> 
                   </div>
                 </div>
               ))}
+              
+              {experiences.length === 0 && (
+                 <div className={`relative glass-card rounded-xl p-5 ${direction === 'rtl' ? 'mr-8' : 'ml-8'}`}>
+                    <p className="text-muted-foreground">
+                        {language === 'ar' ? 'جاري تحميل الخبرات...' : 'Loading experiences...'}
+                    </p>
+                 </div>
+              )}
             </div>
           </div>
         </div>

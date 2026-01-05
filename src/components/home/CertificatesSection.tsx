@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { GraduationCap, Award, Calendar, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { certificatesApi } from '@/lib/api';
 
 interface Certificate {
   id: number;
@@ -14,11 +15,13 @@ interface Certificate {
 }
 
 const CertificatesSection: React.FC = () => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage(); // Added t for translations if needed, though mostly using inline conditionals
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
 
-  const items: Certificate[] = [
+  // Hardcoded education data as there is no DB table for it yet
+  const educationItems: Certificate[] = [
     {
-      id: 1,
+      id: 101, // Arbitrary ID to avoid collision
       title: { en: 'Bachelor of Computer Science', ar: 'بكالوريوس علوم الحاسوب' },
       issuer: { en: 'University of Technology', ar: 'جامعة التكنولوجيا' },
       date: '2015 - 2019',
@@ -28,46 +31,28 @@ const CertificatesSection: React.FC = () => {
       },
       type: 'education',
     },
-    {
-      id: 2,
-      title: { en: 'AWS Certified Solutions Architect', ar: 'مهندس حلول AWS معتمد' },
-      issuer: { en: 'Amazon Web Services', ar: 'خدمات أمازون ويب' },
-      date: '2023',
-      description: {
-        en: 'Professional level certification for designing distributed systems on AWS',
-        ar: 'شهادة مستوى احترافي لتصميم الأنظمة الموزعة على AWS'
-      },
-      credentialUrl: 'https://aws.amazon.com/certification',
-      type: 'certificate',
-    },
-    {
-      id: 3,
-      title: { en: 'Meta Front-End Developer', ar: 'مطور واجهات ميتا' },
-      issuer: { en: 'Meta (Coursera)', ar: 'ميتا (كورسيرا)' },
-      date: '2023',
-      description: {
-        en: 'Comprehensive certification covering React, JavaScript, and modern frontend development',
-        ar: 'شهادة شاملة تغطي React و JavaScript وتطوير الواجهات الحديثة'
-      },
-      credentialUrl: 'https://coursera.org',
-      type: 'certificate',
-    },
-    {
-      id: 4,
-      title: { en: 'Google UX Design', ar: 'تصميم تجربة المستخدم من جوجل' },
-      issuer: { en: 'Google (Coursera)', ar: 'جوجل (كورسيرا)' },
-      date: '2022',
-      description: {
-        en: 'Professional certificate in user experience design and research methodologies',
-        ar: 'شهادة احترافية في تصميم تجربة المستخدم ومنهجيات البحث'
-      },
-      credentialUrl: 'https://coursera.org',
-      type: 'certificate',
-    },
   ];
 
-  const education = items.filter(i => i.type === 'education');
-  const certificates = items.filter(i => i.type === 'certificate');
+  useEffect(() => {
+    const fetchCertificates = async () => {
+        try {
+            const { certificates } = await certificatesApi.getAll();
+            const mappedCertificates = certificates.map((c: any) => ({
+                id: c.id,
+                title: { en: c.title_en, ar: c.title_ar },
+                issuer: { en: c.issuer_en, ar: c.issuer_ar },
+                date: new Date(c.issue_date).getFullYear().toString(),
+                description: { en: '', ar: '' }, // Description is not in the certificate schema, leaving empty or could use title
+                credentialUrl: c.credential_url,
+                type: 'certificate' as const
+            }));
+            setCertificates(mappedCertificates);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    fetchCertificates();
+  }, []);
 
   return (
     <section id="certificates" className="py-20 relative">
@@ -99,7 +84,7 @@ const CertificatesSection: React.FC = () => {
             </div>
 
             <div className="space-y-6">
-              {education.map((item) => (
+              {educationItems.map((item) => (
                 <div 
                   key={item.id}
                   className="glass-card rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-300"
@@ -152,9 +137,10 @@ const CertificatesSection: React.FC = () => {
                       </div>
                       <h4 className="text-lg font-bold mb-1">{item.title[language]}</h4>
                       <p className="text-primary font-medium mb-2">{item.issuer[language]}</p>
-                      <p className="text-sm text-muted-foreground mb-3">{item.description[language]}</p>
+                      {/* Description is not in DB for certificates, checking if I should hide it */}
+                       {/* <p className="text-sm text-muted-foreground mb-3">{item.description[language]}</p> */}
                       {item.credentialUrl && (
-                        <Button asChild variant="outline" size="sm" className="rounded-full gap-2">
+                        <Button asChild variant="outline" size="sm" className="rounded-full gap-2 mt-2">
                           <a href={item.credentialUrl} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-3 w-3" />
                             {language === 'ar' ? 'عرض الشهادة' : 'View Credential'}
@@ -165,6 +151,14 @@ const CertificatesSection: React.FC = () => {
                   </div>
                 </div>
               ))}
+              
+              {certificates.length === 0 && (
+                   <div className="glass-card rounded-2xl p-6">
+                        <p className="text-muted-foreground">
+                            {language === 'ar' ? 'لا توجد شهادات لعرضها.' : 'No certificates to display.'}
+                        </p>
+                   </div>
+              )}
             </div>
           </div>
         </div>

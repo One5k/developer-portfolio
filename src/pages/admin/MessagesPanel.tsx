@@ -25,6 +25,7 @@ const MessagesPanel: React.FC = () => {
       unread: 'Unread',
       from: 'From',
       subject: 'Subject',
+      error: 'An error occurred.',
     },
     ar: {
       title: 'الرسائل',
@@ -38,22 +39,35 @@ const MessagesPanel: React.FC = () => {
       unread: 'غير مقروءة',
       from: 'من',
       subject: 'الموضوع',
+      error: 'حدث خطأ.',
     },
   };
 
   const texts = translations[language];
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm(texts.deleteConfirm)) {
-      deleteMessage(id);
-      toast({ title: texts.deleted });
+      try {
+        await deleteMessage(id);
+        toast({ title: texts.deleted });
+      } catch (error) {
+        toast({ title: texts.error, variant: 'destructive' });
+      }
+    }
+  };
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await markMessageAsRead(id);
+    } catch (error) {
+      toast({ title: texts.error, variant: 'destructive' });
     }
   };
 
   const sortedMessages = [...messages].sort((a, b) => {
     // Unread first, then by date
-    if (a.read !== b.read) return a.read ? 1 : -1;
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    if (a.is_read !== b.is_read) return a.is_read ? 1 : -1;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
   return (
@@ -76,26 +90,26 @@ const MessagesPanel: React.FC = () => {
             <Card 
               key={message.id} 
               className={`glass-card border-border/50 transition-all ${
-                !message.read ? 'border-l-4 border-l-primary bg-primary/5' : ''
+                !message.is_read ? 'border-l-4 border-l-primary bg-primary/5' : ''
               }`}
             >
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row md:items-start gap-4">
                   {/* Avatar */}
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    message.read 
+                    message.is_read 
                       ? 'bg-muted' 
                       : 'bg-gradient-to-br from-primary to-accent'
                   }`}>
-                    <Mail className={`h-5 w-5 ${message.read ? 'text-muted-foreground' : 'text-white'}`} />
+                    <Mail className={`h-5 w-5 ${message.is_read ? 'text-muted-foreground' : 'text-white'}`} />
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                      <h3 className="font-semibold">{message.name}</h3>
-                      <Badge variant={message.read ? 'secondary' : 'default'} className="w-fit">
-                        {message.read ? (
+                      <h3 className="font-semibold">{message.sender_name}</h3>
+                      <Badge variant={message.is_read ? 'secondary' : 'default'} className="w-fit">
+                        {message.is_read ? (
                           <>
                             <Check className="h-3 w-3 mr-1" />
                             {texts.read}
@@ -109,24 +123,23 @@ const MessagesPanel: React.FC = () => {
                       </Badge>
                     </div>
                     
-                    <p className="text-sm text-muted-foreground">{message.email}</p>
+                    <p className="text-sm text-muted-foreground">{message.sender_email}</p>
                     
                     <div className="mt-3">
-                      <p className="text-sm font-medium text-primary">{texts.subject}: {message.subject}</p>
-                      <p className="text-sm mt-2 whitespace-pre-wrap">{message.message}</p>
+                      <p className="text-sm mt-2 whitespace-pre-wrap">{message.content}</p>
                     </div>
 
                     <div className="flex items-center justify-between mt-4">
                       <span className="text-xs text-muted-foreground">
-                        {new Date(message.createdAt).toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US')}
+                        {new Date(message.created_at).toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US')}
                       </span>
                       
                       <div className="flex gap-2">
-                        {!message.read && (
+                        {!message.is_read && (
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => markMessageAsRead(message.id)}
+                            onClick={() => handleMarkAsRead(message.id)}
                           >
                             <Check className="h-3 w-3 mr-1" />
                             {texts.markRead}

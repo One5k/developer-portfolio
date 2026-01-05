@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ExternalLink, Github, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { projectsApi } from '@/lib/api';
 
 interface Project {
   id: number;
@@ -18,85 +19,32 @@ interface Project {
 const ProjectsSection: React.FC = () => {
   const { t, language } = useLanguage();
   const [activeFilter, setActiveFilter] = useState('all');
+  const [projects, setProjects] = useState<Project[]>([]);
 
-  const projects: Project[] = [
-    {
-      id: 1,
-      title: { en: 'E-Commerce Platform', ar: 'منصة تجارة إلكترونية' },
-      description: { 
-        en: 'A full-featured e-commerce platform with payment integration and admin dashboard',
-        ar: 'منصة تجارة إلكترونية متكاملة مع بوابة دفع ولوحة تحكم'
-      },
-      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop',
-      techStack: ['React', 'Node.js', 'PostgreSQL', 'Stripe'],
-      category: 'fullstack',
-      github: 'https://github.com',
-      demo: 'https://demo.com',
-    },
-    {
-      id: 2,
-      title: { en: 'Task Management App', ar: 'تطبيق إدارة المهام' },
-      description: {
-        en: 'A collaborative task management application with real-time updates',
-        ar: 'تطبيق إدارة مهام تعاوني مع تحديثات فورية'
-      },
-      image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop',
-      techStack: ['React', 'TypeScript', 'Supabase'],
-      category: 'frontend',
-      github: 'https://github.com',
-      demo: 'https://demo.com',
-    },
-    {
-      id: 3,
-      title: { en: 'API Gateway Service', ar: 'خدمة بوابة API' },
-      description: {
-        en: 'A scalable API gateway with rate limiting and authentication',
-        ar: 'بوابة API قابلة للتوسع مع تحديد المعدل والمصادقة'
-      },
-      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=600&fit=crop',
-      techStack: ['Node.js', 'Express', 'Redis', 'Docker'],
-      category: 'backend',
-      github: 'https://github.com',
-    },
-    {
-      id: 4,
-      title: { en: 'Mobile Fitness App', ar: 'تطبيق اللياقة البدنية' },
-      description: {
-        en: 'A cross-platform fitness tracking app with workout plans',
-        ar: 'تطبيق تتبع اللياقة البدنية مع خطط التمارين'
-      },
-      image: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=800&h=600&fit=crop',
-      techStack: ['React Native', 'Firebase', 'TypeScript'],
-      category: 'mobile',
-      github: 'https://github.com',
-      demo: 'https://demo.com',
-    },
-    {
-      id: 5,
-      title: { en: 'Analytics Dashboard', ar: 'لوحة تحليلات' },
-      description: {
-        en: 'Real-time analytics dashboard with interactive charts and reports',
-        ar: 'لوحة تحليلات فورية مع رسوم بيانية تفاعلية'
-      },
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
-      techStack: ['React', 'D3.js', 'Python', 'FastAPI'],
-      category: 'fullstack',
-      github: 'https://github.com',
-      demo: 'https://demo.com',
-    },
-    {
-      id: 6,
-      title: { en: 'Social Media UI Kit', ar: 'مجموعة واجهات التواصل الاجتماعي' },
-      description: {
-        en: 'A comprehensive UI component library for social media applications',
-        ar: 'مكتبة مكونات واجهة مستخدم شاملة لتطبيقات التواصل الاجتماعي'
-      },
-      image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=600&fit=crop',
-      techStack: ['React', 'Tailwind CSS', 'Storybook'],
-      category: 'frontend',
-      github: 'https://github.com',
-    },
-  ];
+  useEffect(() => {
+    const fetchProjects = async () => {
+        try {
+            const { projects } = await projectsApi.getAll();
+            const mappedProjects = projects.map((p: any) => ({
+                id: p.id,
+                title: { en: p.title_en, ar: p.title_ar },
+                description: { en: p.description_en, ar: p.description_ar },
+                image: p.image_url,
+                // Assuming project_skills returns an array of skill names or similar, 
+                // but if not, logic might be needed. For now assuming seeded data.
+                // Backend returns 'technologies' array of strings now
+                techStack: p.technologies || [], 
+                category: p.category,
+                github: p.github_url,
+                demo: p.live_url
+            }));
+            setProjects(mappedProjects);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    fetchProjects();
+  }, []);
 
   const filters = [
     { key: 'all', label: t('projects.filter.all') },
@@ -202,6 +150,12 @@ const ProjectsSection: React.FC = () => {
               </div>
             </div>
           ))}
+          
+           {filteredProjects.length === 0 && (
+                <div className="col-span-full text-center py-10">
+                    <p className="text-muted-foreground">{language === 'ar' ? 'لا توجد مشاريع لعرضها حالياً.' : 'No projects to display at the moment.'}</p>
+                </div>
+           )}
         </div>
       </div>
     </section>
