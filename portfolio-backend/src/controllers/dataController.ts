@@ -17,11 +17,11 @@ export const getSkill = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const skills = await db.query('SELECT * FROM skills WHERE id = ? LIMIT 1', [id]);
-    
+
     if (skills.length === 0) {
       return res.status(404).json({ error: 'Skill not found' });
     }
-    
+
     res.json({ skill: skills[0] });
   } catch (error) {
     console.error('Get skill error:', error);
@@ -39,9 +39,9 @@ export const createSkill = async (req: Request, res: Response) => {
       [name_en, name_ar, category, icon_name, proficiency]
     );
 
-    res.status(201).json({ 
-      success: true, 
-      skillId: result.insertId || result[0]?.id 
+    res.status(201).json({
+      success: true,
+      skillId: result.insertId || result[0]?.id
     });
   } catch (error) {
     console.error('Create skill error:', error);
@@ -109,14 +109,14 @@ export const createExperience = async (req: Request, res: Response) => {
 
     const result = await db.query(
       `INSERT INTO experiences 
-      (company_en, company_ar, position_en, position_ar, type, start_date, end_date, description_en, description_ar, company_logo_url, company_url) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [company_en, company_ar, position_en, position_ar, type, start_date, end_date || null, description_en, description_ar, company_logo_url, company_url]
+      (company_en, company_ar, position_en, position_ar, type, start_date, end_date, description_en, description_ar, company_logo_url, company_url, location_en, location_ar) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [company_en, company_ar, position_en, position_ar, type, start_date, end_date || null, description_en, description_ar, company_logo_url, company_url, req.body.location_en, req.body.location_ar]
     );
 
-    res.status(201).json({ 
-      success: true, 
-      experienceId: result.insertId || result[0]?.id 
+    res.status(201).json({
+      success: true,
+      experienceId: result.insertId || result[0]?.id
     });
   } catch (error) {
     console.error('Create experience error:', error);
@@ -146,9 +146,9 @@ export const updateExperience = async (req: Request, res: Response) => {
       `UPDATE experiences SET 
       company_en = ?, company_ar = ?, position_en = ?, position_ar = ?, 
       type = ?, start_date = ?, end_date = ?, description_en = ?, 
-      description_ar = ?, company_logo_url = ?, company_url = ? 
+      description_ar = ?, company_logo_url = ?, company_url = ?, location_en = ?, location_ar = ? 
       WHERE id = ?`,
-      [company_en, company_ar, position_en, position_ar, type, start_date, end_date || null, description_en, description_ar, company_logo_url, company_url, id]
+      [company_en, company_ar, position_en, position_ar, type, start_date, end_date || null, description_en, description_ar, company_logo_url, company_url, req.body.location_en, req.body.location_ar, id]
     );
 
     res.json({ success: true });
@@ -191,9 +191,9 @@ export const createCertificate = async (req: Request, res: Response) => {
       [title_en, title_ar, issuer_en, issuer_ar, issue_date, credential_url]
     );
 
-    res.status(201).json({ 
-      success: true, 
-      certificateId: result.insertId || result[0]?.id 
+    res.status(201).json({
+      success: true,
+      certificateId: result.insertId || result[0]?.id
     });
   } catch (error) {
     console.error('Create certificate error:', error);
@@ -241,9 +241,9 @@ export const createMessage = async (req: Request, res: Response) => {
       [sender_name, sender_email, content]
     );
 
-    res.status(201).json({ 
-      success: true, 
-      messageId: result.insertId || result[0]?.id 
+    res.status(201).json({
+      success: true,
+      messageId: result.insertId || result[0]?.id
     });
   } catch (error) {
     console.error('Create message error:', error);
@@ -285,3 +285,99 @@ export const deleteMessage = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Get all education
+export const getAllEducation = async (req: Request, res: Response) => {
+  try {
+    const education = await db.query('SELECT * FROM education ORDER BY start_date DESC');
+    res.json({ education });
+  } catch (error) {
+    console.error('Get education error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Create education
+export const createEducation = async (req: Request, res: Response) => {
+  try {
+    const {
+      degree_en,
+      degree_ar,
+      institution_en,
+      institution_ar,
+      field_of_study_en,
+      field_of_study_ar,
+      start_date,
+      end_date,
+      description_en,
+      description_ar,
+      location_en,
+      location_ar,
+      gpa,
+    } = req.body;
+
+    const result = await db.query(
+      `INSERT INTO education 
+      (degree_en, degree_ar, institution_en, institution_ar, field_of_study_en, field_of_study_ar, start_date, end_date, description_en, description_ar, location_en, location_ar, gpa) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [degree_en, degree_ar, institution_en, institution_ar, field_of_study_en, field_of_study_ar, start_date, end_date || null, description_en, description_ar, location_en, location_ar, gpa]
+    );
+
+    res.status(201).json({
+      success: true,
+      educationId: result.insertId || result[0]?.id
+    });
+  } catch (error) {
+    console.error('Create education error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Update education
+export const updateEducation = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const {
+      degree_en,
+      degree_ar,
+      institution_en,
+      institution_ar,
+      field_of_study_en,
+      field_of_study_ar,
+      start_date,
+      end_date,
+      description_en,
+      description_ar,
+      location_en,
+      location_ar,
+      gpa,
+    } = req.body;
+
+    await db.query(
+      `UPDATE education SET 
+      degree_en = ?, degree_ar = ?, institution_en = ?, institution_ar = ?, 
+      field_of_study_en = ?, field_of_study_ar = ?, start_date = ?, end_date = ?, 
+      description_en = ?, description_ar = ?, location_en = ?, location_ar = ?, gpa = ? 
+      WHERE id = ?`,
+      [degree_en, degree_ar, institution_en, institution_ar, field_of_study_en, field_of_study_ar, start_date, end_date || null, description_en, description_ar, location_en, location_ar, gpa, id]
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update education error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Delete education
+export const deleteEducation = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await db.query('DELETE FROM education WHERE id = ?', [id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete education error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+

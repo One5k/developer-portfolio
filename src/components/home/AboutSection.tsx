@@ -48,7 +48,7 @@ const AboutSection: React.FC = () => {
             <span className="gradient-text">{t('nav.about')}</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {language === 'ar' 
+            {language === 'ar'
               ? 'تعرف على خبراتي ورحلتي في عالم التطوير'
               : 'Learn about my experience and journey in development'}
           </p>
@@ -64,7 +64,7 @@ const AboutSection: React.FC = () => {
               <p className="text-muted-foreground leading-relaxed mb-6 whitespace-pre-wrap">
                 {bio}
               </p>
-              
+
               {aboutData && (
                 <div className="grid grid-cols-3 gap-4 mb-8">
                   <div className="text-center p-4 bg-muted/20 rounded-lg">
@@ -98,7 +98,7 @@ const AboutSection: React.FC = () => {
             </h3>
             <div className={`space-y-6 relative before:absolute before:top-0 before:bottom-0 before:w-0.5 before:bg-primary/30 ${direction === 'rtl' ? 'before:right-3' : 'before:left-3'}`}>
               {experiences.map((exp, index) => (
-                <div 
+                <div
                   key={exp.id}
                   className={`relative glass-card rounded-xl p-5 ${direction === 'rtl' ? 'mr-8' : 'ml-8'}`}
                 >
@@ -118,18 +118,22 @@ const AboutSection: React.FC = () => {
                     {language === 'ar' ? exp.company_ar : exp.company_en}
                   </p>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
-                    <MapPin className="h-3 w-3" />
-                    <span>{t('about.view_more') || 'View Details'}</span> 
+                    {(exp.location_en || exp.location_ar) && (
+                      <>
+                        <MapPin className="h-3 w-3" />
+                        <span>{language === 'ar' ? exp.location_ar : exp.location_en}</span>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
-              
+
               {experiences.length === 0 && (
-                 <div className={`relative glass-card rounded-xl p-5 ${direction === 'rtl' ? 'mr-8' : 'ml-8'}`}>
-                    <p className="text-muted-foreground">
-                        {language === 'ar' ? 'جاري تحميل الخبرات...' : 'Loading experiences...'}
-                    </p>
-                 </div>
+                <div className={`relative glass-card rounded-xl p-5 ${direction === 'rtl' ? 'mr-8' : 'ml-8'}`}>
+                  <p className="text-muted-foreground">
+                    {language === 'ar' ? 'جاري تحميل الخبرات...' : 'Loading experiences...'}
+                  </p>
+                </div>
               )}
             </div>
           </div>

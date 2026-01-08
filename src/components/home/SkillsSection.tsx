@@ -15,12 +15,12 @@ const SkillsSection: React.FC = () => {
 
   useEffect(() => {
     const fetchSkills = async () => {
-        try {
-            const { skills } = await skillsApi.getAll();
-            setSkills(skills);
-        } catch (error) {
-            console.error(error);
-        }
+      try {
+        const { skills } = await skillsApi.getAll();
+        setSkills(skills);
+      } catch (error) {
+        console.error(error);
+      }
     }
     fetchSkills();
   }, []);
@@ -28,8 +28,8 @@ const SkillsSection: React.FC = () => {
   // Helper to categorize skills dynamically
   const getSkillsByCategory = (category: string) => {
     return skills
-        .filter(s => s.category === category)
-        .map(s => ({ name: s.name_en, level: s.proficiency }));
+      .filter(s => s.category === category)
+      .map(s => ({ name: s.name_en, level: s.proficiency }));
   };
 
   const categories: SkillCategory[] = [
@@ -57,13 +57,7 @@ const SkillsSection: React.FC = () => {
     {
       icon: Users,
       title: { en: 'Soft Skills', ar: 'المهارات الشخصية' },
-      skills: [
-        { name: language === 'ar' ? 'حل المشكلات' : 'Problem Solving', level: 95 },
-        { name: language === 'ar' ? 'العمل الجماعي' : 'Team Collaboration', level: 90 },
-        { name: language === 'ar' ? 'التواصل' : 'Communication', level: 88 },
-        { name: language === 'ar' ? 'إدارة الوقت' : 'Time Management', level: 85 },
-        { name: language === 'ar' ? 'القيادة' : 'Leadership', level: 82 },
-      ],
+      skills: getSkillsByCategory('soft'),
     },
   ];
 
@@ -79,7 +73,7 @@ const SkillsSection: React.FC = () => {
             <span className="gradient-text">{t('skills.title')}</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {language === 'ar' 
+            {language === 'ar'
               ? 'التقنيات والأدوات التي أستخدمها لبناء حلول رقمية متميزة'
               : 'Technologies and tools I use to build exceptional digital solutions'}
           </p>
@@ -88,7 +82,7 @@ const SkillsSection: React.FC = () => {
         {/* Skills Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {activeCategories.map((category, catIndex) => (
-            <div 
+            <div
               key={category.title.en}
               className="glass-card rounded-2xl p-6 animate-fade-in hover:scale-[1.02] transition-transform duration-300"
               style={{ animationDelay: `${catIndex * 0.1}s` }}
@@ -110,9 +104,9 @@ const SkillsSection: React.FC = () => {
                       <span className="text-sm text-muted-foreground">{skill.level}%</span>
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className="h-full rounded-full animated-gradient transition-all duration-1000"
-                        style={{ 
+                        style={{
                           width: `${skill.level}%`,
                           animationDelay: `${(catIndex * 0.1) + (skillIndex * 0.05)}s`
                         }}
@@ -132,7 +126,7 @@ const SkillsSection: React.FC = () => {
           </h3>
           <div className="flex flex-wrap justify-center gap-4">
             {skills.map((skill, index) => (
-              <span 
+              <span
                 key={skill.id || index}
                 className="px-6 py-3 glass-card rounded-full font-medium hover:bg-primary/10 hover:text-primary transition-colors duration-200 cursor-default"
                 style={{ animationDelay: `${0.5 + index * 0.05}s` }}

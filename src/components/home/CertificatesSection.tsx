@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { GraduationCap, Award, Calendar, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { certificatesApi } from '@/lib/api';
+import { certificatesApi, educationApi } from '@/lib/api';
 
 interface Certificate {
   id: number;
@@ -18,40 +18,42 @@ const CertificatesSection: React.FC = () => {
   const { language, t } = useLanguage(); // Added t for translations if needed, though mostly using inline conditionals
   const [certificates, setCertificates] = useState<Certificate[]>([]);
 
-  // Hardcoded education data as there is no DB table for it yet
-  const educationItems: Certificate[] = [
-    {
-      id: 101, // Arbitrary ID to avoid collision
-      title: { en: 'Bachelor of Computer Science', ar: 'بكالوريوس علوم الحاسوب' },
-      issuer: { en: 'University of Technology', ar: 'جامعة التكنولوجيا' },
-      date: '2015 - 2019',
-      description: {
-        en: 'Graduated with honors, specialized in software engineering and web technologies',
-        ar: 'تخرجت بمرتبة الشرف، تخصص هندسة البرمجيات وتقنيات الويب'
-      },
-      type: 'education',
-    },
-  ];
+  const [educationItems, setEducationItems] = useState<Certificate[]>([]);
 
   useEffect(() => {
-    const fetchCertificates = async () => {
-        try {
-            const { certificates } = await certificatesApi.getAll();
-            const mappedCertificates = certificates.map((c: any) => ({
-                id: c.id,
-                title: { en: c.title_en, ar: c.title_ar },
-                issuer: { en: c.issuer_en, ar: c.issuer_ar },
-                date: new Date(c.issue_date).getFullYear().toString(),
-                description: { en: '', ar: '' }, // Description is not in the certificate schema, leaving empty or could use title
-                credentialUrl: c.credential_url,
-                type: 'certificate' as const
-            }));
-            setCertificates(mappedCertificates);
-        } catch (error) {
-            console.error(error);
-        }
+    const fetchData = async () => {
+      try {
+        const [certificatesRes, educationRes] = await Promise.all([
+          certificatesApi.getAll(),
+          educationApi.getAll()
+        ]);
+
+        const mappedCertificates = certificatesRes.certificates.map((c: any) => ({
+          id: c.id,
+          title: { en: c.title_en, ar: c.title_ar },
+          issuer: { en: c.issuer_en, ar: c.issuer_ar },
+          date: new Date(c.issue_date).getFullYear().toString(),
+          description: { en: '', ar: '' },
+          credentialUrl: c.credential_url,
+          type: 'certificate' as const
+        }));
+
+        const mappedEducation = educationRes.education.map((e: any) => ({
+          id: e.id,
+          title: { en: e.degree_en, ar: e.degree_ar },
+          issuer: { en: e.institution_en, ar: e.institution_ar },
+          date: `${new Date(e.start_date).getFullYear()} - ${e.end_date ? new Date(e.end_date).getFullYear() : 'Present'}`,
+          description: { en: e.description_en || '', ar: e.description_ar || '' },
+          type: 'education' as const
+        }));
+
+        setCertificates(mappedCertificates);
+        setEducationItems(mappedEducation);
+      } catch (error) {
+        console.error(error);
+      }
     }
-    fetchCertificates();
+    fetchData();
   }, []);
 
   return (
@@ -65,7 +67,7 @@ const CertificatesSection: React.FC = () => {
             </span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {language === 'ar' 
+            {language === 'ar'
               ? 'رحلتي التعليمية والشهادات المهنية التي حصلت عليها'
               : 'My educational journey and professional certifications'}
           </p>
@@ -85,7 +87,7 @@ const CertificatesSection: React.FC = () => {
 
             <div className="space-y-6">
               {educationItems.map((item) => (
-                <div 
+                <div
                   key={item.id}
                   className="glass-card rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-300"
                 >
@@ -103,6 +105,13 @@ const CertificatesSection: React.FC = () => {
                       <p className="text-sm text-muted-foreground">{item.description[language]}</p>
                     </div>
                   </div>
+                  {educationItems.length === 0 && (
+                    <div className="glass-card rounded-2xl p-6">
+                      <p className="text-muted-foreground">
+                        {language === 'ar' ? 'لا توجد بيانات تعليمية لعرضها.' : 'No education records to display.'}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -121,7 +130,7 @@ const CertificatesSection: React.FC = () => {
 
             <div className="space-y-6">
               {certificates.map((item, index) => (
-                <div 
+                <div
                   key={item.id}
                   className="glass-card rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-300"
                   style={{ animationDelay: `${0.2 + index * 0.05}s` }}
@@ -138,7 +147,7 @@ const CertificatesSection: React.FC = () => {
                       <h4 className="text-lg font-bold mb-1">{item.title[language]}</h4>
                       <p className="text-primary font-medium mb-2">{item.issuer[language]}</p>
                       {/* Description is not in DB for certificates, checking if I should hide it */}
-                       {/* <p className="text-sm text-muted-foreground mb-3">{item.description[language]}</p> */}
+                      {/* <p className="text-sm text-muted-foreground mb-3">{item.description[language]}</p> */}
                       {item.credentialUrl && (
                         <Button asChild variant="outline" size="sm" className="rounded-full gap-2 mt-2">
                           <a href={item.credentialUrl} target="_blank" rel="noopener noreferrer">
@@ -151,13 +160,13 @@ const CertificatesSection: React.FC = () => {
                   </div>
                 </div>
               ))}
-              
+
               {certificates.length === 0 && (
-                   <div className="glass-card rounded-2xl p-6">
-                        <p className="text-muted-foreground">
-                            {language === 'ar' ? 'لا توجد شهادات لعرضها.' : 'No certificates to display.'}
-                        </p>
-                   </div>
+                <div className="glass-card rounded-2xl p-6">
+                  <p className="text-muted-foreground">
+                    {language === 'ar' ? 'لا توجد شهادات لعرضها.' : 'No certificates to display.'}
+                  </p>
+                </div>
               )}
             </div>
           </div>

@@ -2,17 +2,18 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminData } from '@/contexts/AdminDataContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  FolderKanban, 
-  Lightbulb, 
-  Award, 
-  Mail, 
+import {
+  FolderKanban,
+  Lightbulb,
+  Award,
+  Mail,
   MessageSquare,
+  GraduationCap,
 } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
   const { language } = useLanguage();
-  const { projects, skills, certificates, messages } = useAdminData();
+  const { projects, skills, certificates, education, messages } = useAdminData();
 
   const translations = {
     en: {
@@ -21,6 +22,7 @@ const AdminDashboard: React.FC = () => {
       projects: 'Projects',
       skills: 'Skills',
       certificates: 'Certificates',
+      education: 'Education',
       messages: 'Messages',
       unread: 'Unread',
       total: 'Total',
@@ -35,6 +37,7 @@ const AdminDashboard: React.FC = () => {
       projects: 'المشاريع',
       skills: 'المهارات',
       certificates: 'الشهادات',
+      education: 'التعليم',
       messages: 'الرسائل',
       unread: 'غير مقروءة',
       total: 'الإجمالي',
@@ -70,6 +73,13 @@ const AdminDashboard: React.FC = () => {
       subValue: `${texts.total}`,
     },
     {
+      title: texts.education,
+      value: education.length,
+      icon: GraduationCap,
+      color: 'from-indigo-500 to-blue-500',
+      subValue: `${texts.total}`,
+    },
+    {
       title: texts.messages,
       value: messages.length,
       icon: Mail,
@@ -78,7 +88,7 @@ const AdminDashboard: React.FC = () => {
     },
   ];
 
-  const recentMessages = messages.sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
+  const recentMessages = messages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -89,7 +99,7 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {stats.map((stat) => (
           <Card key={stat.title} className="glass-card border-border/50 overflow-hidden">
             <CardContent className="p-6">
@@ -122,13 +132,12 @@ const AdminDashboard: React.FC = () => {
           ) : (
             <div className="space-y-4">
               {recentMessages.map((message) => (
-                <div 
-                  key={message.id} 
-                  className={`p-4 rounded-lg border transition-colors ${
-                    message.is_read 
-                      ? 'bg-muted/30 border-border/50' 
-                      : 'bg-primary/5 border-primary/20'
-                  }`}
+                <div
+                  key={message.id}
+                  className={`p-4 rounded-lg border transition-colors ${message.is_read
+                    ? 'bg-muted/30 border-border/50'
+                    : 'bg-primary/5 border-primary/20'
+                    }`}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">

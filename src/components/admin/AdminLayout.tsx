@@ -27,6 +27,7 @@ import {
   Lightbulb,
   MessageSquare,
   Award,
+  GraduationCap,
   Menu,
   X,
   LogOut,
@@ -59,6 +60,7 @@ const AdminLayout: React.FC = () => {
       homeContent: 'Home Content',
       experiences: 'Experience',
       certificates: 'Certificates',
+      education: 'Education',
       messages: 'Messages',
       logout: 'Logout',
       admin: 'Admin Panel',
@@ -73,6 +75,7 @@ const AdminLayout: React.FC = () => {
       homeContent: 'محتوى الرئيسية',
       experiences: 'الخبرات',
       certificates: 'الشهادات',
+      education: 'التعليم',
       messages: 'الرسائل',
       logout: 'تسجيل الخروج',
       admin: 'لوحة الإدارة',
@@ -91,6 +94,7 @@ const AdminLayout: React.FC = () => {
     { title: texts.skills, url: '/admin/skills', icon: Lightbulb },
     { title: texts.experiences, url: '/admin/experiences', icon: Briefcase },
     { title: texts.certificates, url: '/admin/certificates', icon: Award },
+    { title: texts.education, url: '/admin/education', icon: GraduationCap },
     { title: texts.messages, url: '/admin/messages', icon: Mail, badge: unreadCount },
   ];
 
@@ -132,11 +136,10 @@ const AdminLayout: React.FC = () => {
                       <SidebarMenuItem key={item.url}>
                         <SidebarMenuButton
                           onClick={() => navigate(item.url)}
-                          className={`w-full justify-start gap-3 ${
-                            isActive(item.url) 
-                              ? 'bg-primary/10 text-primary border-l-2 border-primary' 
-                              : 'hover:bg-muted'
-                          }`}
+                          className={`w-full justify-start gap-3 ${isActive(item.url)
+                            ? 'bg-primary/10 text-primary border-l-2 border-primary'
+                            : 'hover:bg-muted'
+                            }`}
                         >
                           <item.icon className="h-4 w-4" />
                           <span className="flex-1">{item.title}</span>

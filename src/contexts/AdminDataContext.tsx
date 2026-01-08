@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { projectsApi, skillsApi, certificatesApi, messagesApi, profileApi, experiencesApi, heroApi, aboutApi } from '@/lib/api';
+import { projectsApi, skillsApi, certificatesApi, messagesApi, profileApi, experiencesApi, heroApi, aboutApi, educationApi } from '@/lib/api';
 
 export interface Project {
   id: string;
@@ -36,6 +36,25 @@ export interface Experience {
   description_en: string;
   description_ar: string;
   company_url?: string;
+  location_en?: string;
+  location_ar?: string;
+}
+
+export interface Education {
+  id: string;
+  degree_en: string;
+  degree_ar: string;
+  institution_en: string;
+  institution_ar: string;
+  field_of_study_en?: string;
+  field_of_study_ar?: string;
+  start_date: string;
+  end_date?: string;
+  description_en?: string;
+  description_ar?: string;
+  location_en?: string;
+  location_ar?: string;
+  gpa?: string;
 }
 
 export interface Certificate {
@@ -109,7 +128,7 @@ interface AdminDataContextType {
   about: AboutData | null;
   updateHero: (data: Partial<HeroData>) => Promise<void>;
   updateAbout: (data: Partial<AboutData>) => Promise<void>;
-  
+
   // Projects
   projects: Project[];
   loading: boolean;
@@ -117,21 +136,21 @@ interface AdminDataContextType {
   updateProject: (id: string, data: any) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
   refreshProjects: () => Promise<void>;
-  
+
   // Skills
   skills: Skill[];
   addSkill: (skill: any) => Promise<void>;
   updateSkill: (id: string, data: any) => Promise<void>;
   deleteSkill: (id: string) => Promise<void>;
   refreshSkills: () => Promise<void>;
-  
+
   // Certificates
   certificates: Certificate[];
   addCertificate: (certificate: any) => Promise<void>;
   updateCertificate: (id: string, data: any) => Promise<void>;
   deleteCertificate: (id: string) => Promise<void>;
   refreshCertificates: () => Promise<void>;
-  
+
   // Messages
   messages: Message[];
   markMessageAsRead: (id: string) => Promise<void>;
@@ -144,6 +163,13 @@ interface AdminDataContextType {
   updateExperience: (id: string, data: any) => Promise<void>;
   deleteExperience: (id: string) => Promise<void>;
   refreshExperiences: () => Promise<void>;
+
+  // Education
+  education: Education[];
+  addEducation: (education: any) => Promise<void>;
+  updateEducation: (id: string, data: any) => Promise<void>;
+  deleteEducation: (id: string) => Promise<void>;
+  refreshEducation: () => Promise<void>;
 }
 
 const AdminDataContext = createContext<AdminDataContextType | undefined>(undefined);
@@ -155,12 +181,13 @@ export const AdminDataProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [projects, setProjects] = useState<Project[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [education, setEducation] = useState<Education[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch all data on mount
- useEffect(() => {
+  useEffect(() => {
     const fetchAllData = async () => {
       try {
         setLoading(true);
@@ -168,6 +195,7 @@ export const AdminDataProvider: React.FC<{ children: ReactNode }> = ({ children 
           refreshProjects(),
           refreshSkills(),
           refreshExperiences(),
+          refreshEducation(),
           refreshCertificates(),
           refreshMessages(),
           refreshProfile(),
@@ -399,6 +427,46 @@ export const AdminDataProvider: React.FC<{ children: ReactNode }> = ({ children 
     }
   };
 
+  // Education functions
+  const refreshEducation = async () => {
+    try {
+      const { education: data } = await educationApi.getAll();
+      setEducation(data.map(e => ({ ...e, id: String(e.id) })));
+    } catch (error) {
+      console.error('Error fetching education:', error);
+    }
+  };
+
+  const addEducation = async (education: any) => {
+    try {
+      await educationApi.create(education);
+      await refreshEducation();
+    } catch (error) {
+      console.error('Error adding education:', error);
+      throw error;
+    }
+  };
+
+  const updateEducation = async (id: string, data: any) => {
+    try {
+      await educationApi.update(id, data);
+      await refreshEducation();
+    } catch (error) {
+      console.error('Error updating education:', error);
+      throw error;
+    }
+  };
+
+  const deleteEducation = async (id: string) => {
+    try {
+      await educationApi.delete(id);
+      await refreshEducation();
+    } catch (error) {
+      console.error('Error deleting education:', error);
+      throw error;
+    }
+  };
+
   // Certificates functions
   const refreshCertificates = async () => {
     try {
@@ -516,6 +584,11 @@ export const AdminDataProvider: React.FC<{ children: ReactNode }> = ({ children 
       updateExperience,
       deleteExperience,
       refreshExperiences,
+      education,
+      addEducation,
+      updateEducation,
+      deleteEducation,
+      refreshEducation,
     }}>
       {children}
     </AdminDataContext.Provider>

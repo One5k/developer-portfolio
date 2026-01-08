@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Briefcase, Calendar } from 'lucide-react';
+import { Plus, Pencil, Trash2, Briefcase, Calendar, MapPin } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Globe } from 'lucide-react';
 
@@ -37,6 +37,8 @@ const ExperiencesPanel: React.FC = () => {
     description: '',
     descriptionAr: '',
     companyUrl: '',
+    location: '',
+    locationAr: '',
   };
 
   const [formData, setFormData] = useState<typeof initialFormData>(initialFormData);
@@ -61,6 +63,8 @@ const ExperiencesPanel: React.FC = () => {
       cancel: 'Cancel',
       delete: 'Delete',
       companyUrl: 'Company Website',
+      location: 'Location (English)',
+      locationAr: 'Location (Arabic)',
       deleteConfirm: 'Are you sure you want to delete this experience?',
       saved: 'Experience saved successfully!',
       deleted: 'Experience deleted successfully!',
@@ -86,6 +90,8 @@ const ExperiencesPanel: React.FC = () => {
       cancel: 'إلغاء',
       delete: 'حذف',
       companyUrl: 'موقع الشركة',
+      location: 'الموقع (إنجليزي)',
+      locationAr: 'الموقع (عربي)',
       deleteConfirm: 'هل أنت متأكد من حذف هذه الخبرة؟',
       saved: 'تم حفظ الخبرة بنجاح!',
       deleted: 'تم حذف الخبرة بنجاح!',
@@ -116,6 +122,8 @@ const ExperiencesPanel: React.FC = () => {
       description: exp.description_en,
       descriptionAr: exp.description_ar,
       companyUrl: exp.company_url || '',
+      location: exp.location_en || '',
+      locationAr: exp.location_ar || '',
     });
     setIsCurrentJob(!exp.end_date);
     setIsDialogOpen(true);
@@ -135,6 +143,8 @@ const ExperiencesPanel: React.FC = () => {
         description_en: formData.description,
         description_ar: formData.descriptionAr,
         company_url: formData.companyUrl,
+        location_en: formData.location,
+        location_ar: formData.locationAr,
         type: 'work', // Default type
         company_logo_url: '', // Default or add field if needed
       };
@@ -276,16 +286,35 @@ const ExperiencesPanel: React.FC = () => {
                 />
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{texts.location}</Label>
+                  <Input
+                    value={formData.location}
+                    onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                    placeholder="e.g. Remote, Riyadh"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{texts.locationAr}</Label>
+                  <Input
+                    value={formData.locationAr}
+                    onChange={(e) => setFormData(prev => ({ ...prev, locationAr: e.target.value }))}
+                    dir="rtl"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label>{texts.companyUrl}</Label>
                 <div className="relative">
-                   <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                   <Input
+                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
                     value={formData.companyUrl}
                     onChange={(e) => setFormData(prev => ({ ...prev, companyUrl: e.target.value }))}
                     className="pl-10"
                     placeholder="https://..."
-                   />
+                  />
                 </div>
               </div>
 
@@ -332,6 +361,12 @@ const ExperiencesPanel: React.FC = () => {
                           {new Date(exp.start_date).toLocaleDateString()} - {exp.end_date ? new Date(exp.end_date).toLocaleDateString() : (language === 'ar' ? 'الآن' : 'Present')}
                         </span>
                       </div>
+                      {(exp.location_en || exp.location_ar) && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1 mb-3">
+                          <MapPin className="h-4 w-4" />
+                          <span>{language === 'ar' ? exp.location_ar : exp.location_en}</span>
+                        </div>
+                      )}
                       <p className="text-muted-foreground">
                         {language === 'ar' ? exp.description_ar : exp.description_en}
                       </p>

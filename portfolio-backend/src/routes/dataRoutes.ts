@@ -24,6 +24,10 @@ import {
   createMessage,
   markMessageAsRead,
   deleteMessage,
+  getAllEducation,
+  createEducation,
+  updateEducation,
+  deleteEducation,
 } from '../controllers/dataController';
 import { authenticate } from '../middleware/auth';
 
@@ -60,5 +64,11 @@ router.post('/messages', createMessage); // Public
 router.get('/messages', authenticate, getAllMessages);
 router.put('/messages/:id/read', authenticate, markMessageAsRead);
 router.delete('/messages/:id', authenticate, deleteMessage);
+
+// Education routes
+router.get('/education', getAllEducation);
+router.post('/education', authenticate, createEducation);
+router.put('/education/:id', authenticate, updateEducation);
+router.delete('/education/:id', authenticate, deleteEducation);
 
 export default router;

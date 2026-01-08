@@ -19,7 +19,7 @@ async function apiCall<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const token = getAuthToken();
-  
+
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` }),
@@ -164,3 +164,20 @@ export const messagesApi = {
     method: 'DELETE',
   }),
 };
+
+// Education API
+export const educationApi = {
+  getAll: () => apiCall<{ education: any[] }>('/education'),
+  create: (data: any) => apiCall<{ success: boolean; educationId: number }>('/education', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  update: (id: string, data: any) => apiCall<{ success: boolean }>(`/education/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (id: string) => apiCall<{ success: boolean }>(`/education/${id}`, {
+    method: 'DELETE',
+  }),
+};
+
