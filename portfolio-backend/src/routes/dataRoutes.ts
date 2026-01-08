@@ -29,6 +29,7 @@ import {
   updateEducation,
   deleteEducation,
 } from '../controllers/dataController';
+import { getSeoSettings, updateSeoSettings } from '../controllers/seoController';
 import { authenticate } from '../middleware/auth';
 
 const router = Router();
@@ -70,5 +71,9 @@ router.get('/education', getAllEducation);
 router.post('/education', authenticate, createEducation);
 router.put('/education/:id', authenticate, updateEducation);
 router.delete('/education/:id', authenticate, deleteEducation);
+
+// SEO routes
+router.get('/seo/:page', getSeoSettings);
+router.put('/seo/:page', authenticate, updateSeoSettings);
 
 export default router;

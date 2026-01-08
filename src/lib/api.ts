@@ -181,3 +181,12 @@ export const educationApi = {
   }),
 };
 
+// SEO API
+export const seoApi = {
+  getSeo: (page: string) => apiCall<{ seo: any }>(`/seo/${page}`),
+  updateSeo: (page: string, data: any) => apiCall<{ success: boolean }>(`/seo/${page}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+};
+

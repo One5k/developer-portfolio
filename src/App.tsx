@@ -20,6 +20,7 @@ import CertificatesPanel from "./pages/admin/CertificatesPanel";
 import MessagesPanel from "./pages/admin/MessagesPanel";
 import ExperiencesPanel from "./pages/admin/ExperiencesPanel";
 import EducationPanel from "./pages/admin/EducationPanel";
+import SeoPanel from "./pages/admin/SeoPanel";
 import HomeContentPanel from "./pages/admin/HomeContentPanel";
 import ProtectedRoute from "./components/admin/ProtectedRoute";
 
@@ -51,6 +52,7 @@ const App = () => (
                       <Route path="certificates" element={<CertificatesPanel />} />
                       <Route path="education" element={<EducationPanel />} />
                       <Route path="experiences" element={<ExperiencesPanel />} />
+                      <Route path="seo" element={<SeoPanel />} />
                       <Route path="home-content" element={<HomeContentPanel />} />
                       <Route path="messages" element={<MessagesPanel />} />
                     </Route>

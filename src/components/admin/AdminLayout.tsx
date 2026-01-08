@@ -38,7 +38,8 @@ import {
   Grid,
   Home,
   Briefcase,
-  LayoutTemplate
+  LayoutTemplate,
+  Search
 } from 'lucide-react';
 
 const AdminLayout: React.FC = () => {
@@ -66,6 +67,7 @@ const AdminLayout: React.FC = () => {
       admin: 'Admin Panel',
       management: 'Management',
       backToSite: 'Back to Site',
+      seo: 'SEO Settings',
     },
     ar: {
       dashboard: 'لوحة التحكم',
@@ -81,6 +83,7 @@ const AdminLayout: React.FC = () => {
       admin: 'لوحة الإدارة',
       management: 'الإدارة',
       backToSite: 'العودة للموقع',
+      seo: 'إعدادات SEO',
     },
   };
 
@@ -95,6 +98,7 @@ const AdminLayout: React.FC = () => {
     { title: texts.experiences, url: '/admin/experiences', icon: Briefcase },
     { title: texts.certificates, url: '/admin/certificates', icon: Award },
     { title: texts.education, url: '/admin/education', icon: GraduationCap },
+    { title: texts.seo, url: '/admin/seo', icon: Search },
     { title: texts.messages, url: '/admin/messages', icon: Mail, badge: unreadCount },
   ];
 
