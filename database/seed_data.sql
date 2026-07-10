@@ -57,4 +57,32 @@ INSERT INTO messages (sender_name, sender_email, content, is_read) VALUES
 
 INSERT INTO experiences (company_en, company_ar, position_en, position_ar, start_date, end_date, description_en, description_ar, type, company_url) VALUES
 ('Tech Corp', 'شركة التقنية', 'Senior Developer', 'مطور أول', '2020-01-01', NULL, 'Leading the frontend team.', 'قيادة فريق الواجهة الأمامية.', 'work', 'https://techcorp.com'),
-('Startup Inc', 'ستارت أب', 'Frontend Developer', 'مطور واجهة أمامية', '2018-05-01', '2019-12-31', 'Built the main product UI.', 'بناء واجهة المنتج الرئيسية.', 'work');
+('Startup Inc', 'ستارت أب', 'Frontend Developer', 'مطور واجهة أمامية', '2018-05-01', '2019-12-31', 'Built the main product UI.', 'بناء واجهة المنتج الرئيسية.', 'work', NULL);
+
+-- Education Seed Data
+INSERT INTO education (
+  degree_en, degree_ar,
+  institution_en, institution_ar,
+  field_of_study_en, field_of_study_ar,
+  start_date, end_date,
+  description_en, description_ar,
+  location_en, location_ar,
+  gpa
+) VALUES (
+  'Bachelor of Computer Science', 'بكالوريوس علوم الحاسوب',
+  'University of Technology', 'جامعة التكنولوجيا',
+  'Software Engineering', 'هندسة البرمجيات',
+  '2015-09-01', '2019-06-30',
+  'Graduated with honors, specialized in software engineering and web technologies',
+  'تخرجت بمرتبة الشرف، تخصص هندسة البرمجيات وتقنيات الويب',
+  'New York, USA', 'نيويورك، أمريكا',
+  '3.8'
+);
+
+-- Soft Skills Seed Data
+INSERT INTO skills (name_en, name_ar, category, proficiency, icon_name) VALUES
+('Problem Solving', 'حل المشكلات', 'soft', 95, 'brain'),
+('Team Collaboration', 'العمل الجماعي', 'soft', 90, 'users'),
+('Communication', 'التواصل', 'soft', 88, 'message'),
+('Time Management', 'إدارة الوقت', 'soft', 85, 'clock'),
+('Leadership', 'القيادة', 'soft', 82, 'award');

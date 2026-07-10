@@ -63,6 +63,26 @@ CREATE TABLE IF NOT EXISTS experiences (
     description_en TEXT,
     description_ar TEXT,
     company_logo_url TEXT,
+    company_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4.5 Education
+CREATE TABLE IF NOT EXISTS education (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    degree_en VARCHAR(255) NOT NULL,
+    degree_ar VARCHAR(255) NOT NULL,
+    institution_en VARCHAR(255) NOT NULL,
+    institution_ar VARCHAR(255) NOT NULL,
+    field_of_study_en VARCHAR(255),
+    field_of_study_ar VARCHAR(255),
+    start_date DATE NOT NULL,
+    end_date DATE,
+    description_en TEXT,
+    description_ar TEXT,
+    location_en VARCHAR(255),
+    location_ar VARCHAR(255),
+    gpa VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

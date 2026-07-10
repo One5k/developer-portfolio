@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { seoApi } from '@/lib/api';
 import { Globe, Search, Save, AlertCircle } from 'lucide-react';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 const SeoPanel: React.FC = () => {
     const { language } = useLanguage();
@@ -169,10 +170,9 @@ const SeoPanel: React.FC = () => {
 
                             <div className="space-y-2">
                                 <Label>{texts.ogImage}</Label>
-                                <Input
+                                <ImageUpload
                                     value={formData.og_image_url}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, og_image_url: e.target.value }))}
-                                    placeholder="https://..."
+                                    onChange={(url) => setFormData(prev => ({ ...prev, og_image_url: url }))}
                                 />
                             </div>
 

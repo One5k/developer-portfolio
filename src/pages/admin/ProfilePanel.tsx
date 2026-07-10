@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminData, Profile } from '@/contexts/AdminDataContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,13 +8,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Save, User, Mail, Phone, MapPin, Github, Linkedin, Twitter } from 'lucide-react';
+import { ImageUpload } from '@/components/ui/image-upload';
+import { FileUpload } from '@/components/ui/file-upload';
 
 const ProfilePanel: React.FC = () => {
   const { language } = useLanguage();
   const { profile, updateProfile } = useAdminData();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Initialize with empty defaults to prevent controlled/uncontrolled errors
   const [formData, setFormData] = useState<Profile>({
     id: '',
@@ -34,6 +36,7 @@ const ProfilePanel: React.FC = () => {
     twitter_url: '',
     avatar_url: '',
     resume_url: '',
+    resume_url_ar: '',
     created_at: '',
     updated_at: ''
   });
@@ -63,6 +66,8 @@ const ProfilePanel: React.FC = () => {
       linkedin: 'LinkedIn URL',
       twitter: 'Twitter URL',
       avatar: 'Avatar URL',
+      resumeEn: 'Resume / CV (English PDF)',
+      resumeAr: 'Resume / CV (Arabic PDF)',
       save: 'Save Changes',
       saving: 'Saving...',
       saved: 'Profile updated successfully!',
@@ -88,6 +93,8 @@ const ProfilePanel: React.FC = () => {
       linkedin: 'رابط LinkedIn',
       twitter: 'رابط Twitter',
       avatar: 'رابط الصورة الشخصية',
+      resumeEn: 'السيرة الذاتية (إنجليزي - PDF)',
+      resumeAr: 'السيرة الذاتية (عربي - PDF)',
       save: 'حفظ التغييرات',
       saving: 'جاري الحفظ...',
       saved: 'تم تحديث الملف الشخصي بنجاح!',
@@ -190,22 +197,27 @@ const ProfilePanel: React.FC = () => {
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="avatar_url">{texts.avatar}</Label>
-              <Input
-                id="avatar_url"
+              <Label>{texts.avatar}</Label>
+              <ImageUpload
                 value={formData.avatar_url || ''}
-                onChange={(e) => handleChange('avatar_url', e.target.value)}
-                placeholder="https://..."
+                onChange={(url) => handleChange('avatar_url', url)}
               />
             </div>
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="resume_url">{language === 'ar' ? 'رابط السيرة الذاتية' : 'Resume URL'}</Label>
-              <Input
-                id="resume_url"
-                value={formData.resume_url || ''}
-                onChange={(e) => handleChange('resume_url', e.target.value)}
-                placeholder="https://..."
-              />
+            <div className="space-y-4 md:col-span-2 border-t pt-4 mt-2">
+              <div className="space-y-2">
+                <Label>{texts.resumeEn}</Label>
+                <FileUpload
+                  value={formData.resume_url || ''}
+                  onChange={(url) => handleChange('resume_url', url)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>{texts.resumeAr}</Label>
+                <FileUpload
+                  value={formData.resume_url_ar || ''}
+                  onChange={(url) => handleChange('resume_url_ar', url)}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -57,30 +57,28 @@ const CertificatesSection: React.FC = () => {
   }, []);
 
   return (
-    <section id="certificates" className="py-20 relative">
+    <section id="certificates" className="py-24 relative bg-background">
       <div className="section-container">
         {/* Header */}
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="gradient-text">
-              {language === 'ar' ? 'الشهادات والتعليم' : 'Certificates & Education'}
-            </span>
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground mb-4 font-display">
+            {language === 'ar' ? 'الشهادات والتعليم' : 'Certificates & Education'}
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
             {language === 'ar'
               ? 'رحلتي التعليمية والشهادات المهنية التي حصلت عليها'
               : 'My educational journey and professional certifications'}
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
           {/* Education */}
-          <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-3 rounded-xl bg-accent/10">
-                <GraduationCap className="h-6 w-6 text-accent" />
+          <div className="animate-fade-in">
+            <div className="flex items-center gap-3.5 mb-8">
+              <div className="p-3 bg-secondary rounded-none">
+                <GraduationCap className="h-5 w-5 text-accent" />
               </div>
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-xl font-bold text-foreground">
                 {language === 'ar' ? 'التعليم' : 'Education'}
               </h3>
             </div>
@@ -89,41 +87,44 @@ const CertificatesSection: React.FC = () => {
               {educationItems.map((item) => (
                 <div
                   key={item.id}
-                  className="glass-card rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-300"
+                  className="obsidian-card rounded-none p-6"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-accent/10 mt-1">
-                      <GraduationCap className="h-5 w-5 text-accent" />
+                  <div className="flex flex-col">
+                    <div className="text-xs font-mono font-bold tracking-wider text-accent uppercase mb-2">
+                      {item.date}
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>{item.date}</span>
-                      </div>
-                      <h4 className="text-lg font-bold mb-1">{item.title[language]}</h4>
-                      <p className="text-primary font-medium mb-2">{item.issuer[language]}</p>
-                      <p className="text-sm text-muted-foreground">{item.description[language]}</p>
-                    </div>
-                  </div>
-                  {educationItems.length === 0 && (
-                    <div className="glass-card rounded-2xl p-6">
-                      <p className="text-muted-foreground">
-                        {language === 'ar' ? 'لا توجد بيانات تعليمية لعرضها.' : 'No education records to display.'}
+                    <h4 className="text-lg font-bold text-foreground mb-1">
+                      {item.title[language]}
+                    </h4>
+                    <p className="text-sm font-semibold text-primary mb-3">
+                      {item.issuer[language]}
+                    </p>
+                    {item.description[language] && (
+                      <p className="text-sm text-muted-foreground/80 leading-relaxed">
+                        {item.description[language]}
                       </p>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               ))}
+
+              {educationItems.length === 0 && (
+                <div className="obsidian-card rounded-none p-6 text-center">
+                  <p className="text-muted-foreground text-sm">
+                    {language === 'ar' ? 'لا توجد بيانات تعليمية لعرضها.' : 'No education records to display.'}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Certificates */}
-          <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-3 rounded-xl bg-primary/10">
-                <Award className="h-6 w-6 text-primary" />
+          <div className="animate-fade-in">
+            <div className="flex items-center gap-3.5 mb-8">
+              <div className="p-3 bg-secondary rounded-none">
+                <Award className="h-5 w-5 text-primary" />
               </div>
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-xl font-bold text-foreground">
                 {language === 'ar' ? 'الشهادات المهنية' : 'Professional Certificates'}
               </h3>
             </div>
@@ -132,38 +133,34 @@ const CertificatesSection: React.FC = () => {
               {certificates.map((item, index) => (
                 <div
                   key={item.id}
-                  className="glass-card rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-300"
-                  style={{ animationDelay: `${0.2 + index * 0.05}s` }}
+                  className="obsidian-card rounded-none p-6"
+                  style={{ animationDelay: `${0.1 + index * 0.05}s` }}
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-primary/10 mt-1">
-                      <Award className="h-5 w-5 text-primary" />
+                  <div className="flex flex-col">
+                    <div className="text-xs font-mono font-bold tracking-wider text-primary uppercase mb-2">
+                      {item.date}
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>{item.date}</span>
-                      </div>
-                      <h4 className="text-lg font-bold mb-1">{item.title[language]}</h4>
-                      <p className="text-primary font-medium mb-2">{item.issuer[language]}</p>
-                      {/* Description is not in DB for certificates, checking if I should hide it */}
-                      {/* <p className="text-sm text-muted-foreground mb-3">{item.description[language]}</p> */}
-                      {item.credentialUrl && (
-                        <Button asChild variant="outline" size="sm" className="rounded-full gap-2 mt-2">
-                          <a href={item.credentialUrl} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="h-3 w-3" />
-                            {language === 'ar' ? 'عرض الشهادة' : 'View Credential'}
-                          </a>
-                        </Button>
-                      )}
-                    </div>
+                    <h4 className="text-lg font-bold text-foreground mb-1">
+                      {item.title[language]}
+                    </h4>
+                    <p className="text-sm font-semibold text-muted-foreground mb-4">
+                      {item.issuer[language]}
+                    </p>
+                    {item.credentialUrl && (
+                      <Button asChild variant="outline" size="sm" className="rounded-none border-border hover:bg-secondary text-xs px-4 py-2 self-start gap-1.5 mt-1">
+                        <a href={item.credentialUrl} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                          {language === 'ar' ? 'عرض الشهادة' : 'View Credential'}
+                        </a>
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
 
               {certificates.length === 0 && (
-                <div className="glass-card rounded-2xl p-6">
-                  <p className="text-muted-foreground">
+                <div className="obsidian-card rounded-none p-6 text-center">
+                  <p className="text-muted-foreground text-sm">
                     {language === 'ar' ? 'لا توجد شهادات لعرضها.' : 'No certificates to display.'}
                   </p>
                 </div>

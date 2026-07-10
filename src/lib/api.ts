@@ -1,192 +1,464 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import { supabase } from './supabase';
 
-// Token management
+// Token/Session helpers kept for backward compatibility (if any component uses them)
 export const getAuthToken = (): string | null => {
-  return localStorage.getItem('auth_token');
+  return localStorage.getItem('sb-access-token');
 };
 
 export const setAuthToken = (token: string): void => {
-  localStorage.setItem('auth_token', token);
+  localStorage.setItem('sb-access-token', token);
 };
 
 export const removeAuthToken = (): void => {
-  localStorage.removeItem('auth_token');
+  localStorage.removeItem('sb-access-token');
 };
-
-// Generic API call helper
-async function apiCall<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const token = getAuthToken();
-
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
-    ...options.headers,
-  };
-
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(error.error || `HTTP ${response.status}`);
-  }
-
-  return response.json();
-}
 
 // Authentication API
 export const authApi = {
   login: async (username: string, password: string) => {
-    const response = await apiCall<{ token: string; user: any }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ username, password }),
+    let email = username;
+    // Helper to allow logging in with 'admin' or an email
+    if (!username.includes('@')) {
+      email = `${username}@example.com`;
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
-    setAuthToken(response.token);
-    return response;
+
+    if (error) throw error;
+
+    if (data.session) {
+      setAuthToken(data.session.access_token);
+    }
+
+    return {
+      token: data.session?.access_token || '',
+      user: {
+        id: data.user?.id,
+        email: data.user?.email,
+        role: 'admin',
+      },
+    };
   },
 
-  logout: () => {
+  logout: async () => {
     removeAuthToken();
+    await supabase.auth.signOut();
   },
 
-  getMe: () => apiCall<{ user: any }>('/auth/me'),
+  getMe: async () => {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error || !session) {
+      throw new Error('No session');
+    }
+    return {
+      user: {
+        id: session.user.id,
+        email: session.user.email,
+        role: 'admin',
+      },
+    };
+  },
 };
 
 // Profile API
 export const profileApi = {
-  getProfile: () => apiCall<{ profile: any }>('/profile'),
-  updateProfile: (data: any) => apiCall<{ success: boolean; profile: any }>('/profile', {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
+  getProfile: async () => {
+    const { data, error } = await supabase.from('profile').select('*').limit(1).single();
+    if (error) throw error;
+    return { profile: data };
+  },
+  updateProfile: async (data: any) => {
+    const { data: updated, error } = await supabase
+      .from('profile')
+      .update(data)
+      .eq('id', data.id || 1)
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, profile: updated };
+  },
 };
 
 // Hero Section API
 export const heroApi = {
-  getHero: () => apiCall<{ hero: any }>('/hero'),
-  updateHero: (data: any) => apiCall<{ success: boolean; hero: any }>('/hero', {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
+  getHero: async () => {
+    const { data, error } = await supabase.from('hero_section').select('*').limit(1).single();
+    if (error) throw error;
+    return { hero: data };
+  },
+  updateHero: async (data: any) => {
+    const { data: updated, error } = await supabase
+      .from('hero_section')
+      .update(data)
+      .eq('id', data.id || 1)
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, hero: updated };
+  },
 };
 
 // About Section API
 export const aboutApi = {
-  getAbout: () => apiCall<{ about: any }>('/about'),
-  updateAbout: (data: any) => apiCall<{ success: boolean; about: any }>('/about', {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
+  getAbout: async () => {
+    const { data, error } = await supabase.from('about_section').select('*').limit(1).single();
+    if (error) throw error;
+    return { about: data };
+  },
+  updateAbout: async (data: any) => {
+    const { data: updated, error } = await supabase
+      .from('about_section')
+      .update(data)
+      .eq('id', data.id || 1)
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, about: updated };
+  },
 };
 
 // Projects API
 export const projectsApi = {
-  getAll: () => apiCall<{ projects: any[] }>('/projects'),
-  getOne: (id: string) => apiCall<{ project: any }>(`/projects/${id}`),
-  create: (data: any) => apiCall<{ success: boolean; projectId: number }>('/projects', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-  update: (id: string, data: any) => apiCall<{ success: boolean }>(`/projects/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
-  delete: (id: string) => apiCall<{ success: boolean }>(`/projects/${id}`, {
-    method: 'DELETE',
-  }),
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select(`
+        *,
+        project_skills (
+          skills (
+            name_en
+          )
+        )
+      `)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+
+    const projectsWithSkills = data.map((project: any) => ({
+      ...project,
+      technologies: project.project_skills
+        ? project.project_skills.map((ps: any) => ps.skills?.name_en).filter(Boolean)
+        : [],
+    }));
+    return { projects: projectsWithSkills };
+  },
+  getOne: async (id: string) => {
+    const { data, error } = await supabase
+      .from('projects')
+      .select(`
+        *,
+        project_skills (
+          skills (
+            *
+          )
+        )
+      `)
+      .eq('id', id)
+      .single();
+    if (error) throw error;
+
+    const skills = data.project_skills
+      ? data.project_skills.map((ps: any) => ps.skills).filter(Boolean)
+      : [];
+    return { project: { ...data, skills } };
+  },
+  create: async (data: any) => {
+    const { skill_ids, ...projectData } = data;
+    const { data: newProject, error } = await supabase
+      .from('projects')
+      .insert([projectData])
+      .select()
+      .single();
+    if (error) throw error;
+
+    if (skill_ids && Array.isArray(skill_ids) && skill_ids.length > 0) {
+      const relationRows = skill_ids.map((skillId: any) => ({
+        project_id: newProject.id,
+        skill_id: skillId,
+      }));
+      const { error: relError } = await supabase
+        .from('project_skills')
+        .insert(relationRows);
+      if (relError) throw relError;
+    }
+    return { success: true, projectId: newProject.id };
+  },
+  update: async (id: string, data: any) => {
+    const { skill_ids, ...projectData } = data;
+
+    const { error: updateError } = await supabase
+      .from('projects')
+      .update(projectData)
+      .eq('id', id);
+    if (updateError) throw updateError;
+
+    if (skill_ids !== undefined && Array.isArray(skill_ids)) {
+      // Clear current associations
+      const { error: deleteError } = await supabase
+        .from('project_skills')
+        .delete()
+        .eq('project_id', id);
+      if (deleteError) throw deleteError;
+
+      if (skill_ids.length > 0) {
+        const relationRows = skill_ids.map((skillId: any) => ({
+          project_id: parseInt(id),
+          skill_id: skillId,
+        }));
+        const { error: insertError } = await supabase
+          .from('project_skills')
+          .insert(relationRows);
+        if (insertError) throw insertError;
+      }
+    }
+    return { success: true };
+  },
+  delete: async (id: string) => {
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  },
 };
 
 // Skills API
 export const skillsApi = {
-  getAll: () => apiCall<{ skills: any[] }>('/skills'),
-  getOne: (id: string) => apiCall<{ skill: any }>(`/skills/${id}`),
-  create: (data: any) => apiCall<{ success: boolean; skillId: number }>('/skills', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-  update: (id: string, data: any) => apiCall<{ success: boolean }>(`/skills/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
-  delete: (id: string) => apiCall<{ success: boolean }>(`/skills/${id}`, {
-    method: 'DELETE',
-  }),
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('skills')
+      .select('*')
+      .order('category', { ascending: true })
+      .order('name_en', { ascending: true });
+    if (error) throw error;
+    return { skills: data };
+  },
+  getOne: async (id: string) => {
+    const { data, error } = await supabase
+      .from('skills')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw error;
+    return { skill: data };
+  },
+  create: async (data: any) => {
+    const { data: newSkill, error } = await supabase
+      .from('skills')
+      .insert([data])
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, skillId: newSkill.id };
+  },
+  update: async (id: string, data: any) => {
+    const { error } = await supabase
+      .from('skills')
+      .update(data)
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  },
+  delete: async (id: string) => {
+    const { error } = await supabase
+      .from('skills')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  },
 };
 
 // Experiences API
 export const experiencesApi = {
-  getAll: () => apiCall<{ experiences: any[] }>('/experiences'),
-  create: (data: any) => apiCall<{ success: boolean; experienceId: number }>('/experiences', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-  update: (id: string, data: any) => apiCall<{ success: boolean }>(`/experiences/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
-  delete: (id: string) => apiCall<{ success: boolean }>(`/experiences/${id}`, {
-    method: 'DELETE',
-  }),
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('experiences')
+      .select('*')
+      .order('start_date', { ascending: false });
+    if (error) throw error;
+    return { experiences: data };
+  },
+  create: async (data: any) => {
+    const { data: newExp, error } = await supabase
+      .from('experiences')
+      .insert([data])
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, experienceId: newExp.id };
+  },
+  update: async (id: string, data: any) => {
+    const { error } = await supabase
+      .from('experiences')
+      .update(data)
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  },
+  delete: async (id: string) => {
+    const { error } = await supabase
+      .from('experiences')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  },
 };
 
 // Certificates API
 export const certificatesApi = {
-  getAll: () => apiCall<{ certificates: any[] }>('/certificates'),
-  create: (data: any) => apiCall<{ success: boolean; certificateId: number }>('/certificates', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-  update: (id: string, data: any) => apiCall<{ success: boolean }>(`/certificates/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
-  delete: (id: string) => apiCall<{ success: boolean }>(`/certificates/${id}`, {
-    method: 'DELETE',
-  }),
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('certificates')
+      .select('*')
+      .order('issue_date', { ascending: false });
+    if (error) throw error;
+    return { certificates: data };
+  },
+  create: async (data: any) => {
+    const { data: newCert, error } = await supabase
+      .from('certificates')
+      .insert([data])
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, certificateId: newCert.id };
+  },
+  update: async (id: string, data: any) => {
+    const { error } = await supabase
+      .from('certificates')
+      .update(data)
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  },
+  delete: async (id: string) => {
+    const { error } = await supabase
+      .from('certificates')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  },
 };
 
 // Messages API
 export const messagesApi = {
-  getAll: () => apiCall<{ messages: any[] }>('/messages'),
-  create: (data: any) => apiCall<{ success: boolean; messageId: number }>('/messages', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-  markAsRead: (id: string) => apiCall<{ success: boolean }>(`/messages/${id}/read`, {
-    method: 'PUT',
-  }),
-  delete: (id: string) => apiCall<{ success: boolean }>(`/messages/${id}`, {
-    method: 'DELETE',
-  }),
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return { messages: data };
+  },
+  create: async (data: any) => {
+    const { data: newMsg, error } = await supabase
+      .from('messages')
+      .insert([data])
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, messageId: newMsg.id };
+  },
+  markAsRead: async (id: string) => {
+    const { error } = await supabase
+      .from('messages')
+      .update({ is_read: true })
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  },
+  delete: async (id: string) => {
+    const { error } = await supabase
+      .from('messages')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  },
 };
 
 // Education API
 export const educationApi = {
-  getAll: () => apiCall<{ education: any[] }>('/education'),
-  create: (data: any) => apiCall<{ success: boolean; educationId: number }>('/education', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-  update: (id: string, data: any) => apiCall<{ success: boolean }>(`/education/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
-  delete: (id: string) => apiCall<{ success: boolean }>(`/education/${id}`, {
-    method: 'DELETE',
-  }),
+  getAll: async () => {
+    const { data, error } = await supabase
+      .from('education')
+      .select('*')
+      .order('start_date', { ascending: false });
+    if (error) throw error;
+    return { education: data };
+  },
+  create: async (data: any) => {
+    const { data: newEdu, error } = await supabase
+      .from('education')
+      .insert([data])
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, educationId: newEdu.id };
+  },
+  update: async (id: string, data: any) => {
+    const { error } = await supabase
+      .from('education')
+      .update(data)
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  },
+  delete: async (id: string) => {
+    const { error } = await supabase
+      .from('education')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  },
 };
 
 // SEO API
 export const seoApi = {
-  getSeo: (page: string) => apiCall<{ seo: any }>(`/seo/${page}`),
-  updateSeo: (page: string, data: any) => apiCall<{ success: boolean }>(`/seo/${page}`, {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
+  getSeo: async (page: string) => {
+    const { data, error } = await supabase
+      .from('seo_settings')
+      .select('*')
+      .eq('page_identifier', page)
+      .maybeSingle();
+    if (error) throw error;
+    return { seo: data };
+  },
+  updateSeo: async (page: string, data: any) => {
+    const { error } = await supabase
+      .from('seo_settings')
+      .upsert({ ...data, page_identifier: page }, { onConflict: 'page_identifier' });
+    if (error) throw error;
+    return { success: true };
+  },
 };
 
+// Upload API
+export const uploadApi = {
+  uploadFile: async (file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+
+    const { data, error } = await supabase.storage
+      .from('portfolio')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('portfolio')
+      .getPublicUrl(data.path);
+
+    return { success: true, url: publicUrl };
+  },
+};

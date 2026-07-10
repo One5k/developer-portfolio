@@ -13,6 +13,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
@@ -24,6 +25,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, ExternalLink, Github, FolderKanban, Star } from 'lucide-react';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 const ProjectsPanel: React.FC = () => {
   const { language } = useLanguage();
@@ -209,6 +211,9 @@ const ProjectsPanel: React.FC = () => {
               <DialogTitle>
                 {editingProject ? texts.editProject : texts.addProject}
               </DialogTitle>
+              <DialogDescription>
+                {texts.subtitle}
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -255,10 +260,9 @@ const ProjectsPanel: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{texts.image}</Label>
-                  <Input
+                  <ImageUpload
                     value={formData.image}
-                    onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                    placeholder="https://..."
+                    onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
                   />
                 </div>
                 <div className="space-y-2">

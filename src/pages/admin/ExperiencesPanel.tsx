@@ -11,12 +11,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Briefcase, Calendar, MapPin } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Globe } from 'lucide-react';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 const ExperiencesPanel: React.FC = () => {
   const { language } = useLanguage();
@@ -37,6 +39,7 @@ const ExperiencesPanel: React.FC = () => {
     description: '',
     descriptionAr: '',
     companyUrl: '',
+    companyLogo: '',
     location: '',
     locationAr: '',
   };
@@ -63,6 +66,7 @@ const ExperiencesPanel: React.FC = () => {
       cancel: 'Cancel',
       delete: 'Delete',
       companyUrl: 'Company Website',
+      companyLogo: 'Company Logo',
       location: 'Location (English)',
       locationAr: 'Location (Arabic)',
       deleteConfirm: 'Are you sure you want to delete this experience?',
@@ -90,6 +94,7 @@ const ExperiencesPanel: React.FC = () => {
       cancel: 'إلغاء',
       delete: 'حذف',
       companyUrl: 'موقع الشركة',
+      companyLogo: 'شعار الشركة',
       location: 'الموقع (إنجليزي)',
       locationAr: 'الموقع (عربي)',
       deleteConfirm: 'هل أنت متأكد من حذف هذه الخبرة؟',
@@ -122,6 +127,7 @@ const ExperiencesPanel: React.FC = () => {
       description: exp.description_en,
       descriptionAr: exp.description_ar,
       companyUrl: exp.company_url || '',
+      companyLogo: exp.company_logo_url || '',
       location: exp.location_en || '',
       locationAr: exp.location_ar || '',
     });
@@ -146,7 +152,7 @@ const ExperiencesPanel: React.FC = () => {
         location_en: formData.location,
         location_ar: formData.locationAr,
         type: 'work', // Default type
-        company_logo_url: '', // Default or add field if needed
+        company_logo_url: formData.companyLogo,
       };
 
       if (editingExperience) {
@@ -193,6 +199,9 @@ const ExperiencesPanel: React.FC = () => {
               <DialogTitle>
                 {editingExperience ? texts.editExperience : texts.addExperience}
               </DialogTitle>
+              <DialogDescription>
+                {texts.subtitle}
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

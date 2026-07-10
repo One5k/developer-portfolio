@@ -118,7 +118,10 @@ const AdminLayout: React.FC = () => {
     <div dir={direction} className="min-h-screen bg-background">
       <SidebarProvider>
         <div className="flex min-h-screen w-full">
-          <Sidebar className="border-r border-border">
+          <Sidebar 
+            side={direction === 'rtl' ? 'right' : 'left'} 
+            className={direction === 'rtl' ? 'border-l border-border' : 'border-r border-border'}
+          >
             <SidebarHeader className="p-4 border-b border-border">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
@@ -141,7 +144,7 @@ const AdminLayout: React.FC = () => {
                         <SidebarMenuButton
                           onClick={() => navigate(item.url)}
                           className={`w-full justify-start gap-3 ${isActive(item.url)
-                            ? 'bg-primary/10 text-primary border-l-2 border-primary'
+                            ? `bg-primary/10 text-primary ${direction === 'rtl' ? 'border-r-2' : 'border-l-2'} border-primary`
                             : 'hover:bg-muted'
                             }`}
                         >

@@ -95,6 +95,7 @@ export interface Profile {
   linkedin_url?: string;
   twitter_url?: string;
   resume_url?: string;
+  resume_url_ar?: string;
   avatar_url?: string;
 }
 

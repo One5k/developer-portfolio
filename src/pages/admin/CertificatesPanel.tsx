@@ -10,10 +10,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Award, ExternalLink, Calendar } from 'lucide-react';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 const CertificatesPanel: React.FC = () => {
   const { language } = useLanguage();
@@ -160,6 +162,9 @@ const CertificatesPanel: React.FC = () => {
               <DialogTitle>
                 {editingCertificate ? texts.editCertificate : texts.addCertificate}
               </DialogTitle>
+              <DialogDescription>
+                {texts.subtitle}
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -214,10 +219,9 @@ const CertificatesPanel: React.FC = () => {
 
               <div className="space-y-2">
                 <Label>{texts.credentialUrl}</Label>
-                <Input
+                <ImageUpload
                   value={formData.credentialUrl}
-                  onChange={(e) => setFormData(prev => ({ ...prev, credentialUrl: e.target.value }))}
-                  placeholder="https://..."
+                  onChange={(url) => setFormData(prev => ({ ...prev, credentialUrl: url }))}
                 />
               </div>
 

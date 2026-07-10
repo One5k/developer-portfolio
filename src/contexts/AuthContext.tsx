@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authApi, getAuthToken, removeAuthToken } from '@/lib/api';
+import { authApi } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
 
 interface User {
-  id: number;
+  id: string;
   username: string;
   email: string;
   role: string;
@@ -25,28 +26,56 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     // Check for existing session
     const checkAuth = async () => {
-      const token = getAuthToken();
-      if (token) {
-        try {
-          const { user: userData } = await authApi.getMe();
-          setUser(userData);
-        } catch (error) {
-          console.error('Session validation failed:', error);
-          removeAuthToken();
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (session) {
+          setUser({
+            id: session.user.id,
+            username: session.user.email?.split('@')[0] || 'admin',
+            email: session.user.email || '',
+            role: 'admin',
+          });
         }
+      } catch (error) {
+        console.error('Session validation failed:', error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     checkAuth();
+
+    // Subscribe to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setUser({
+          id: session.user.id,
+          username: session.user.email?.split('@')[0] || 'admin',
+          email: session.user.email || '',
+          role: 'admin',
+        });
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (username: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
-    
     try {
-      const { user: userData } = await authApi.login(username, password);
-      setUser(userData);
+      const response = await authApi.login(username, password);
+      setUser({
+        id: response.user.id,
+        username: response.user.email?.split('@')[0] || 'admin',
+        email: response.user.email || '',
+        role: 'admin',
+      });
       setIsLoading(false);
       return { success: true };
     } catch (error: any) {
@@ -58,9 +87,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    authApi.logout();
+  const logout = async () => {
+    setIsLoading(true);
+    try {
+      await authApi.logout();
+      setUser(null);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -83,4 +119,5 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+
 

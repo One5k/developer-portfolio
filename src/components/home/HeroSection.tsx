@@ -9,6 +9,7 @@ const HeroSection: React.FC = () => {
   const { t, language, direction } = useLanguage();
   const [heroData, setHeroData] = useState<any>(null);
   const [profileData, setProfileData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,10 +22,41 @@ const HeroSection: React.FC = () => {
         setProfileData(profileRes.profile);
       } catch (error) {
         console.error('Failed to fetch data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
   }, []);
+
+  if (isLoading) {
+    return (
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
+        {/* Premium Ambient Light */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="relative z-10 section-container text-center pt-20 w-full">
+          <div className="max-w-4xl mx-auto flex flex-col items-center">
+            {/* Avatar skeleton */}
+            <div className="mb-8 w-32 h-32 md:w-40 md:h-40 rounded-full bg-muted animate-pulse" />
+            {/* Eyebrow skeleton */}
+            <div className="h-4 w-32 bg-muted mb-4 animate-pulse rounded" />
+            {/* Name/Title skeleton */}
+            <div className="h-16 md:h-20 w-3/4 bg-muted mb-6 animate-pulse rounded" />
+            {/* Subtitle skeleton */}
+            <div className="h-8 w-1/2 bg-muted mb-8 animate-pulse rounded" />
+            {/* Bio skeleton */}
+            <div className="h-4 w-2/3 bg-muted mb-2 animate-pulse rounded" />
+            <div className="h-4 w-1/2 bg-muted mb-10 animate-pulse rounded" />
+            {/* Buttons skeleton */}
+            <div className="flex gap-4">
+              <div className="h-12 w-36 bg-muted animate-pulse rounded-none" />
+              <div className="h-12 w-36 bg-muted animate-pulse rounded-none" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   // Fallback to defaults if loading or error, but ideally valid seed data should be present
   const greeting = heroData 
@@ -58,47 +90,55 @@ const HeroSection: React.FC = () => {
   ].filter(link => link.show);
 
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 tech-grid opacity-50" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
-      
-      {/* Animated Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse-glow" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/20 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '1s' }} />
+    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
+      {/* Premium Ambient Light */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none animate-pulse-glow" />
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Content */}
-      <div className="relative z-10 section-container text-center">
+      <div className="relative z-10 section-container text-center pt-20">
         <div className="max-w-4xl mx-auto">
-          {/* Greeting */}
-          <p className="text-lg md:text-xl text-muted-foreground mb-4 animate-fade-in">
+          {/* Hero Image / Avatar */}
+          {heroData?.hero_image_url && (
+            <div className="mb-8 flex justify-center animate-fade-in">
+              <div className="relative group">
+                {/* Glowing ambient background */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-full blur-md opacity-50 group-hover:opacity-75 transition duration-500" />
+                <img
+                  src={heroData.hero_image_url}
+                  alt={title}
+                  className="relative w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-background shadow-2xl"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Greeting Eyebrow (Distinctive, not generic numbers) */}
+          <p className="text-sm uppercase tracking-[0.25em] text-primary mb-4 font-bold">
             {greeting}
           </p>
 
-          {/* Name/Title */}
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <span className="gradient-text">{title}</span>
+          {/* Large Name/Title */}
+          <h1 className="text-6xl md:text-8xl font-extrabold tracking-tight text-foreground mb-6 font-display">
+            {title}
           </h1>
 
-          {/* Subtitle with Typing Effect */}
-          <div className="mb-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <span className="inline-block px-4 py-2 rounded-full glass-card text-lg md:text-xl font-mono text-primary">
-              {'>'} {subtitle}
-              <span className="animate-blink">_</span>
-            </span>
-          </div>
+          {/* Subtitle */}
+          <p className="text-2xl md:text-3xl font-light text-muted-foreground mb-8 tracking-wide">
+            {subtitle}
+          </p>
 
-          {/* Description */}
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          {/* Bio Description */}
+          <p className="text-base md:text-lg text-muted-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed">
             {description}
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <Button
               asChild
               size="lg"
-              className="btn-gradient rounded-full px-8 gap-2 group"
+              className="btn-premium rounded-none px-8 py-6 gap-2 group"
             >
               <Link to="/projects">
                 {t('home.cta.projects')}
@@ -109,7 +149,7 @@ const HeroSection: React.FC = () => {
               asChild
               variant="outline"
               size="lg"
-              className="rounded-full px-8 glass-card border-primary/30 hover:border-primary hover:bg-primary/10"
+              className="rounded-none border-border hover:bg-secondary hover:text-foreground px-8 py-6 text-muted-foreground"
             >
               <Link to="/contact">
                 {t('home.cta.contact')}
@@ -119,16 +159,16 @@ const HeroSection: React.FC = () => {
 
           {/* Social Links */}
           {socialLinks.length > 0 && (
-            <div className="flex items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+            <div className="flex items-center justify-center gap-6 text-muted-foreground">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3 rounded-full glass-card text-muted-foreground hover:text-primary hover:glow-primary transition-all duration-300"
+                  className="hover:text-primary transition-colors duration-300"
                 >
-                  <social.icon className="h-6 w-6" />
+                  <social.icon className="h-5 w-5" />
                 </a>
               ))}
             </div>
@@ -136,32 +176,10 @@ const HeroSection: React.FC = () => {
         </div>
 
         {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-fade-in" style={{ animationDelay: '0.6s' }}>
-          <div className="flex flex-col items-center gap-2 text-muted-foreground">
-            <span className="text-sm">{t('home.scroll')}</span>
-            <ChevronDown className="h-5 w-5 animate-bounce" />
-          </div>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground/60 hover:text-primary transition-colors duration-300">
+          <span className="text-xs uppercase tracking-widest">{t('home.scroll')}</span>
+          <ChevronDown className="h-4 w-4 animate-bounce" />
         </div>
-      </div>
-
-      {/* Floating Code Blocks - Decorative */}
-      <div className="hidden lg:block absolute top-1/3 left-10 glass-card rounded-lg p-4 animate-float opacity-60">
-        <pre className="text-xs font-mono text-primary">
-          <code>{`const dev = {
-  passion: true,
-  coffee: "∞"
-};`}</code>
-        </pre>
-      </div>
-
-      <div className="hidden lg:block absolute bottom-1/3 right-10 glass-card rounded-lg p-4 animate-float opacity-60" style={{ animationDelay: '2s' }}>
-        <pre className="text-xs font-mono text-accent">
-          <code>{`while (alive) {
-  eat();
-  sleep();
-  code();
-}`}</code>
-        </pre>
       </div>
     </section>
   );

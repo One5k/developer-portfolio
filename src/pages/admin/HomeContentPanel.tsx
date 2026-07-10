@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { Save, Image as ImageIcon, FileText, BarChart3, LayoutTemplate } from 'lucide-react';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 const HomeContentPanel: React.FC = () => {
   const { language } = useLanguage();
@@ -232,17 +233,10 @@ const HomeContentPanel: React.FC = () => {
 
                 <div className="space-y-2">
                   <Label>{texts.heroImage}</Label>
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        value={heroForm.hero_image_url}
-                        onChange={(e) => setHeroForm({ ...heroForm, hero_image_url: e.target.value })}
-                        className="pl-10"
-                        placeholder="https://..."
-                      />
-                    </div>
-                  </div>
+                  <ImageUpload
+                    value={heroForm.hero_image_url}
+                    onChange={(url) => setHeroForm({ ...heroForm, hero_image_url: url })}
+                  />
                 </div>
 
                 <div className="flex justify-end pt-4">

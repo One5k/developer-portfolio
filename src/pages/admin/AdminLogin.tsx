@@ -43,7 +43,7 @@ const AdminLogin: React.FC = () => {
       loggingIn: 'Signing in...',
       demo: 'Default Credentials',
       demoUsername: 'Username: admin',
-      demoPassword: 'Password: Admin@123456',
+      demoPassword: 'Password: admin123',
       warning: 'Change your password after first login for security.',
     },
     ar: {
@@ -55,7 +55,7 @@ const AdminLogin: React.FC = () => {
       loggingIn: 'جاري تسجيل الدخول...',
       demo: 'بيانات افتراضية',
       demoUsername: 'اسم المستخدم: admin',
-      demoPassword: 'كلمة المرور: Admin@123456',
+      demoPassword: 'كلمة المرور: admin123',
       warning: 'غيّر كلمة المرور بعد أول تسجيل دخول للأمان.',
     },
   };

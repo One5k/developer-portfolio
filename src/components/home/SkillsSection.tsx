@@ -12,18 +12,49 @@ interface SkillCategory {
 const SkillsSection: React.FC = () => {
   const { t, language } = useLanguage();
   const [skills, setSkills] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSkills = async () => {
-      try {
-        const { skills } = await skillsApi.getAll();
-        setSkills(skills);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    fetchSkills();
+     const fetchSkills = async () => {
+       try {
+         const { skills } = await skillsApi.getAll();
+         setSkills(skills);
+       } catch (error) {
+         console.error(error);
+       } finally {
+         setIsLoading(false);
+       }
+     }
+     fetchSkills();
   }, []);
+
+  if (isLoading) {
+    return (
+      <section id="skills" className="py-24 relative bg-background">
+        <div className="section-container">
+          <div className="text-center mb-20">
+            <div className="h-10 w-48 bg-muted animate-pulse mx-auto mb-4 rounded-none" />
+            <div className="h-4 w-64 bg-muted animate-pulse mx-auto rounded-none" />
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="obsidian-card rounded-none p-8 flex flex-col gap-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 bg-muted animate-pulse rounded-none" />
+                  <div className="h-6 w-32 bg-muted animate-pulse rounded-none" />
+                </div>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map((j) => (
+                    <div key={j} className="h-10 w-full bg-muted animate-pulse rounded-none" />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   // Helper to categorize skills dynamically
   const getSkillsByCategory = (category: string) => {
@@ -65,14 +96,14 @@ const SkillsSection: React.FC = () => {
   const activeCategories = categories.filter(c => c.skills.length > 0 || c.title.en === 'Soft Skills');
 
   return (
-    <section id="skills" className="py-20 relative">
+    <section id="skills" className="py-24 relative bg-background">
       <div className="section-container">
         {/* Header */}
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="gradient-text">{t('skills.title')}</span>
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground mb-4 font-display">
+            {t('skills.title')}
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
             {language === 'ar'
               ? 'التقنيات والأدوات التي أستخدمها لبناء حلول رقمية متميزة'
               : 'Technologies and tools I use to build exceptional digital solutions'}
@@ -84,34 +115,26 @@ const SkillsSection: React.FC = () => {
           {activeCategories.map((category, catIndex) => (
             <div
               key={category.title.en}
-              className="glass-card rounded-2xl p-6 animate-fade-in hover:scale-[1.02] transition-transform duration-300"
+              className="obsidian-card rounded-none p-8 animate-fade-in"
               style={{ animationDelay: `${catIndex * 0.1}s` }}
             >
               {/* Category Header */}
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 rounded-xl bg-primary/10">
-                  <category.icon className="h-6 w-6 text-primary" />
+              <div className="flex items-center gap-3.5 mb-8">
+                <div className="p-3 rounded-none bg-secondary">
+                  <category.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold">{category.title[language]}</h3>
+                <h3 className="text-lg font-bold text-foreground">{category.title[language]}</h3>
               </div>
 
-              {/* Skills List */}
-              <div className="space-y-4">
-                {category.skills.map((skill, skillIndex) => (
-                  <div key={skill.name}>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium">{skill.name}</span>
-                      <span className="text-sm text-muted-foreground">{skill.level}%</span>
-                    </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full animated-gradient transition-all duration-1000"
-                        style={{
-                          width: `${skill.level}%`,
-                          animationDelay: `${(catIndex * 0.1) + (skillIndex * 0.05)}s`
-                        }}
-                      />
-                    </div>
+              {/* Skills List - Technical Ledger style (No progress bars!) */}
+              <div className="space-y-3">
+                {category.skills.map((skill) => (
+                  <div 
+                    key={skill.name}
+                    className="flex items-center justify-between p-3.5 bg-secondary/30 border border-border/40 rounded-none hover:border-primary/30 transition-colors duration-200"
+                  >
+                    <span className="text-sm font-semibold text-foreground">{skill.name}</span>
+                    <span className="text-xs font-mono text-primary font-medium">{skill.level}%</span>
                   </div>
                 ))}
               </div>
@@ -120,16 +143,16 @@ const SkillsSection: React.FC = () => {
         </div>
 
         {/* Tech Icons Cloud */}
-        <div className="mt-16 text-center animate-fade-in" style={{ animationDelay: '0.5s' }}>
-          <h3 className="text-2xl font-bold mb-8">
+        <div className="mt-24 text-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <h3 className="text-xl font-bold text-foreground mb-10">
             {language === 'ar' ? 'التقنيات التي أعمل بها' : 'Technologies I Work With'}
           </h3>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-3">
             {skills.map((skill, index) => (
               <span
                 key={skill.id || index}
-                className="px-6 py-3 glass-card rounded-full font-medium hover:bg-primary/10 hover:text-primary transition-colors duration-200 cursor-default"
-                style={{ animationDelay: `${0.5 + index * 0.05}s` }}
+                className="px-5 py-2.5 bg-secondary border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/50 text-xs font-mono uppercase tracking-wider rounded-none transition-all duration-200 cursor-default"
+                style={{ animationDelay: `${0.4 + index * 0.03}s` }}
               >
                 {skill.name_en}
               </span>
