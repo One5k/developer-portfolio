@@ -15,7 +15,7 @@
 ## 📖 Overview / نظرة عامة
 
 ### English
-A premium, highly-optimized developer portfolio designed for **Anas Al-Amri**. This project features a fully dynamic, bilingual (Arabic & English) public portfolio and a secure, comprehensive administrative dashboard. 
+A premium, highly-optimized developer portfolio designed for **Anas Al-Ameri**. This project features a fully dynamic, bilingual (Arabic & English) public portfolio and a secure, comprehensive administrative dashboard. 
 * **Zero Backend Costs:** Leverages Supabase Serverless Architecture (Postgres database, Row Level Security, Auth, and Storage Buckets).
 * **AI-Augmented Development Workflow:** Engineered and audited using advanced AI coding workflows (Claude Code, Google Antigravity).
 
@@ -50,13 +50,13 @@ A premium, highly-optimized developer portfolio designed for **Anas Al-Amri**. T
 ## 🖼️ User Interface / واجهة المستخدم
 
 <div align="center">
-  <h4>Main Portfolio Interface / واجهة الموقع التعريفية</h4>
+  <h4>Main Portfolio Interface / الواجهة الرئيسية لمعرض الأعمال</h4>
   <img src="screen/screencapture-localhost-8080-2026-07-10-21_47_16.png" alt="Portfolio Preview" width="800" />
   
   <br/><br/>
   
-  <h4>Admin Management Hub / لوحة التحكم الإدارية</h4>
-  <img src="screen/screencapture-localhost-8080-2026-07-10-21_47_47.png" alt="Admin Dashboard Preview" width="800" />
+  <h4>Admin Management Hub / الواجهة الرئيسية لمعرض الأعمالEn</h4>
+  <img src="screen/screencapture-localhost-8080-2026-07-10-21_47_47.png" alt="Admin Hub Preview" width="800" />
 </div>
 
 ---
@@ -103,6 +103,6 @@ npm run dev
 ## 👤 Contact / للتواصل
 
 * **Email:** aannaass2076@gmail.com
-* **LinkedIn:** [Anas Al-Amri](https://linkedin.com/in/on5k)
+* **LinkedIn:** [Anas Al-Ameri](https://linkedin.com/in/on5k)
 * **GitHub:** [@One5k](https://github.com/One5k)
 * **Phone:** +967 773 703 388
