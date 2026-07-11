@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { ArrowRight, Github, Linkedin, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -89,6 +88,24 @@ const HeroSection: React.FC = () => {
     }
   ].filter(link => link.show);
 
+  const scrollToProjects = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const element = document.getElementById('projects');
+    if (element) {
+      const offsetTop = element.offsetTop - 80;
+      window.scrollTo({
+        top: offsetTop,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const getWhatsAppUrl = () => {
+    if (!profileData?.phone) return 'https://wa.me/967773703388';
+    const cleanPhone = profileData.phone.replace(/[+\s\-()]/g, '');
+    return `https://wa.me/${cleanPhone}`;
+  };
+
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
       {/* Premium Ambient Light */}
@@ -136,24 +153,26 @@ const HeroSection: React.FC = () => {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <Button
-              asChild
               size="lg"
-              className="btn-premium rounded-none px-8 py-6 gap-2 group"
+              className="btn-premium rounded-none px-8 py-6 gap-2 group cursor-pointer"
+              onClick={scrollToProjects}
             >
-              <Link to="/projects">
-                {t('home.cta.projects')}
-                <ArrowRight className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${direction === 'rtl' ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
-              </Link>
+              {t('home.cta.projects')}
+              <ArrowRight className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${direction === 'rtl' ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
             </Button>
             <Button
               asChild
               variant="outline"
               size="lg"
-              className="rounded-none border-border hover:bg-secondary hover:text-foreground px-8 py-6 text-muted-foreground"
+              className="rounded-none border-border hover:bg-secondary hover:text-foreground px-8 py-6 text-muted-foreground cursor-pointer"
             >
-              <Link to="/contact">
+              <a 
+                href={getWhatsAppUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {t('home.cta.contact')}
-              </Link>
+              </a>
             </Button>
           </div>
 
