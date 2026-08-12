@@ -373,6 +373,7 @@
   [dir="rtl"] .font-display {
     font-family: 'Thmanyah Serif Display', serif !important;
     letter-spacing: normal !important;
+    font-feature-settings: "swsh" 1, "cswh" 1, "calt" 1, "liga" 1, "dlig" 1;
   }
 
   /* Explicit rule preventing letter-spacing on Arabic connected scripts */
