@@ -1,216 +1,521 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Cairo:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   Thmanyah Font Family Declarations
+   ========================================================================== */
+
+/* Thmanyah Serif Display (Calligraphic / Headline Display) */
+@font-face {
+  font-family: 'Thmanyah Serif Display';
+  src: url('/fonts/thmanyah/serif-display/thmanyahserifdisplay-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+@font-face {
+  font-family: 'Thmanyah Serif Display';
+  src: url('/fonts/thmanyah/serif-display/thmanyahserifdisplay-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+@font-face {
+  font-family: 'Thmanyah Serif Display';
+  src: url('/fonts/thmanyah/serif-display/thmanyahserifdisplay-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+@font-face {
+  font-family: 'Thmanyah Serif Display';
+  src: url('/fonts/thmanyah/serif-display/thmanyahserifdisplay-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+@font-face {
+  font-family: 'Thmanyah Serif Display';
+  src: url('/fonts/thmanyah/serif-display/thmanyahserifdisplay-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+
+/* Thmanyah Sans (Clean UI & Paragraph Sans) */
+@font-face {
+  font-family: 'Thmanyah Sans';
+  src: url('/fonts/thmanyah/sans/thmanyahsans-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+@font-face {
+  font-family: 'Thmanyah Sans';
+  src: url('/fonts/thmanyah/sans/thmanyahsans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+@font-face {
+  font-family: 'Thmanyah Sans';
+  src: url('/fonts/thmanyah/sans/thmanyahsans-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+@font-face {
+  font-family: 'Thmanyah Sans';
+  src: url('/fonts/thmanyah/sans/thmanyahsans-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+@font-face {
+  font-family: 'Thmanyah Sans';
+  src: url('/fonts/thmanyah/sans/thmanyahsans-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+
+/* Thmanyah Serif Text (Editorial Serif) */
+@font-face {
+  font-family: 'Thmanyah Serif Text';
+  src: url('/fonts/thmanyah/serif-text/thmanyahseriftext-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+@font-face {
+  font-family: 'Thmanyah Serif Text';
+  src: url('/fonts/thmanyah/serif-text/thmanyahseriftext-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+@font-face {
+  font-family: 'Thmanyah Serif Text';
+  src: url('/fonts/thmanyah/serif-text/thmanyahseriftext-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+200C-200F, U+FE70-FEFF;
+}
+
+/* ==========================================================================
+   Design System Tokens & 3 Color Directions
+   ========================================================================== */
+
 @layer base {
+  /* Common Design System Tokens */
   :root {
-    /* Premium Obsidian & Copper Palette - Light Mode */
-    --background: 0 0% 98%;
-    --foreground: 240 10% 4%;
-    
+    --radius: 0.75rem; /* 12px unified radius */
+    --radius-sm: 0.5rem; /* 8px */
+    --radius-md: 0.75rem; /* 12px */
+    --radius-lg: 1rem; /* 16px */
+    --radius-xl: 1.5rem; /* 24px */
+  }
+
+  /* --------------------------------------------------------------------------
+     DEFAULT / COLOR DIRECTION 1: Neutral / Apple
+     Quiet, luxury, minimal identity with subtle graphite platinum accent
+     -------------------------------------------------------------------------- */
+  :root,
+  [data-color-direction="neutral-apple"] {
+    --background: 0 0% 98%; /* Pure Light #FAFAFA */
+    --foreground: 0 0% 9%; /* Charcoal #171717 */
+
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 4%;
-    
+    --card-foreground: 0 0% 9%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 4%;
-    
-    --primary: 24 95% 50%;
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 240 5% 95%;
-    --secondary-foreground: 240 10% 4%;
-    
-    --muted: 240 5% 95%;
-    --muted-foreground: 240 4% 45%;
-    
-    --accent: 40 80% 50%;
-    --accent-foreground: 0 0% 100%;
-    
+    --popover-foreground: 0 0% 9%;
+
+    --primary: 215 25% 27%; /* Slate Graphite Accent */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 94%;
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 215 15% 92%;
+    --accent-foreground: 0 0% 9%;
+
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    
-    --border: 240 5% 90%;
-    --input: 240 5% 90%;
-    --ring: 24 95% 50%;
-    
-    --radius: 0.5rem; /* Shorter border radius for a sharp, premium tech look */
-    
-    /* Glow Effects */
-    --glow-primary: 0 0 30px hsl(24 95% 50% / 0.15);
-    
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 240 5% 90%;
-    --sidebar-ring: 24 95% 50%;
+
+    --border: 0 0% 89%;
+    --input: 0 0% 89%;
+    --ring: 215 25% 27%;
+
+    --glow-primary: 0 0 25px hsl(215 25% 27% / 0.1);
   }
 
-  .dark {
-    /* Premium Obsidian & Copper Palette - Dark Mode */
-    --background: 240 10% 4%; /* Deep carbon ebony */
-    --foreground: 0 0% 98%;
-    
-    --card: 240 8% 8%; /* Refined dark carbon cards */
-    --card-foreground: 0 0% 98%;
-    
-    --popover: 240 8% 8%;
-    --popover-foreground: 0 0% 98%;
-    
-    --primary: 24 95% 58%; /* Glowing copper accent */
-    --primary-foreground: 240 10% 4%;
-    
-    --secondary: 240 6% 12%;
-    --secondary-foreground: 0 0% 98%;
-    
-    --muted: 240 6% 12%;
-    --muted-foreground: 240 4% 65%;
-    
-    --accent: 40 80% 60%; /* Warm champagne secondary accent */
-    --accent-foreground: 240 10% 4%;
-    
+  .dark:root,
+  .dark[data-color-direction="neutral-apple"],
+  [data-color-direction="neutral-apple"].dark {
+    --background: 0 0% 3%; /* True Pitch Black #080808 */
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 215 20% 82%; /* Quiet Platinum Accent */
+    --primary-foreground: 0 0% 5%;
+
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 215 15% 15%;
+    --accent-foreground: 0 0% 95%;
+
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    
-    --border: 240 6% 14%;
-    --input: 240 6% 14%;
-    --ring: 24 95% 58%;
-    
-    --glow-primary: 0 0 40px hsl(24 95% 58% / 0.25);
 
-    --sidebar-background: 240 8% 8%;
-    --sidebar-foreground: 240 5% 90%;
-    --sidebar-primary: 24 95% 58%;
-    --sidebar-primary-foreground: 240 10% 4%;
-    --sidebar-accent: 240 6% 12%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 6% 14%;
-    --sidebar-ring: 24 95% 58%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 215 20% 82%;
+
+    --glow-primary: 0 0 30px hsl(215 20% 82% / 0.15);
   }
 
+  /* --------------------------------------------------------------------------
+     COLOR DIRECTION 2: Deep Creative
+     Electric Ultramarine Indigo for Full-stack & UI/UX Developer identity
+     -------------------------------------------------------------------------- */
+  [data-color-direction="deep-creative"] {
+    --background: 230 25% 97%; /* Refined Cool Slate Light */
+    --foreground: 230 35% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 230 35% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 230 35% 10%;
+
+    --primary: 238 82% 60%; /* Electric Ultramarine Indigo */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 230 20% 93%;
+    --secondary-foreground: 230 35% 10%;
+
+    --muted: 230 18% 94%;
+    --muted-foreground: 230 15% 45%;
+
+    --accent: 238 82% 95%;
+    --accent-foreground: 238 82% 60%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 230 20% 88%;
+    --input: 230 20% 88%;
+    --ring: 238 82% 60%;
+
+    --glow-primary: 0 0 30px hsl(238 82% 60% / 0.15);
+  }
+
+  .dark[data-color-direction="deep-creative"] {
+    --background: 230 25% 6%; /* Deep Space Indigo Charcoal #0C0E14 */
+    --foreground: 230 15% 96%;
+
+    --card: 230 22% 10%; /* #141722 */
+    --card-foreground: 230 15% 96%;
+
+    --popover: 230 22% 10%;
+    --popover-foreground: 230 15% 96%;
+
+    --primary: 238 86% 66%; /* Vibrant Ultramarine */
+    --primary-foreground: 230 25% 6%;
+
+    --secondary: 230 20% 14%;
+    --secondary-foreground: 230 15% 96%;
+
+    --muted: 230 20% 14%;
+    --muted-foreground: 230 12% 65%;
+
+    --accent: 238 40% 18%;
+    --accent-foreground: 238 86% 66%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 230 20% 16%;
+    --input: 230 20% 16%;
+    --ring: 238 86% 66%;
+
+    --glow-primary: 0 0 35px hsl(238 86% 66% / 0.2);
+  }
+
+  /* --------------------------------------------------------------------------
+     COLOR DIRECTION 3: Arabic Contemporary
+     Refined Desert Terracotta & Alabaster Warm Sienna
+     -------------------------------------------------------------------------- */
+  [data-color-direction="arabic-contemporary"] {
+    --background: 36 30% 97%; /* Alabaster Warm Cream #FAF8F5 */
+    --foreground: 20 20% 12%; /* Warm Charcoal #241F1D */
+
+    --card: 0 0% 100%;
+    --card-foreground: 20 20% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 20% 12%;
+
+    --primary: 18 65% 46%; /* Desert Terracotta Sienna */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 36 20% 92%;
+    --secondary-foreground: 20 20% 12%;
+
+    --muted: 36 20% 93%;
+    --muted-foreground: 20 12% 44%;
+
+    --accent: 18 50% 94%;
+    --accent-foreground: 18 65% 46%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 36 20% 87%;
+    --input: 36 20% 87%;
+    --ring: 18 65% 46%;
+
+    --glow-primary: 0 0 25px hsl(18 65% 46% / 0.12);
+  }
+
+  .dark[data-color-direction="arabic-contemporary"] {
+    --background: 20 18% 7%; /* Deep Night Bronze #141110 */
+    --foreground: 36 25% 94%;
+
+    --card: 20 16% 11%; /* #1E1A18 */
+    --card-foreground: 36 25% 94%;
+
+    --popover: 20 16% 11%;
+    --popover-foreground: 36 25% 94%;
+
+    --primary: 22 75% 56%; /* Warm Sienna Bronze */
+    --primary-foreground: 20 18% 7%;
+
+    --secondary: 20 15% 15%;
+    --secondary-foreground: 36 25% 94%;
+
+    --muted: 20 15% 15%;
+    --muted-foreground: 36 12% 64%;
+
+    --accent: 22 40% 18%;
+    --accent-foreground: 22 75% 56%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 20 15% 18%;
+    --input: 20 15% 18%;
+    --ring: 22 75% 56%;
+
+    --glow-primary: 0 0 35px hsl(22 75% 56% / 0.18);
+  }
+
+  /* Global Base & Typography Settings */
   * {
     @apply border-border;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Sora', sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
-  /* RTL Support */
-  [dir="rtl"] body {
-    font-family: 'Cairo', sans-serif;
+  /* Arabic Typography Override Rules */
+  [dir="rtl"] body,
+  [dir="rtl"] p,
+  [dir="rtl"] button,
+  [dir="rtl"] input,
+  [dir="rtl"] select,
+  [dir="rtl"] textarea,
+  [dir="rtl"] .font-sans {
+    font-family: 'Thmanyah Sans', sans-serif !important;
   }
-  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6 {
-    font-family: 'Cairo', sans-serif;
+
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] .font-display {
+    font-family: 'Thmanyah Serif Display', serif !important;
+    letter-spacing: normal !important;
+  }
+
+  /* Explicit rule preventing letter-spacing on Arabic connected scripts */
+  .no-letter-spacing,
+  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4, [dir="rtl"] p, [dir="rtl"] span {
+    letter-spacing: normal !important;
   }
 
   html {
     scroll-behavior: smooth;
   }
+
+  /* Focus Ring styling adhering to Apple WCAG AA standards */
+  *:focus-visible {
+    outline: none !important;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary) / 0.5) !important;
+  }
 }
 
+/* Components Layer */
 @layer components {
-  /* Premium Obsidian Card */
+  /* Apple / Framer Clean Luxury Card */
   .obsidian-card {
     background-color: hsl(var(--card));
     border: 1px solid hsl(var(--border));
-    box-shadow: 0 4px 20px hsl(0 0% 0% / 0.05);
-    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 20px hsl(0 0% 0% / 0.03);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease, box-shadow 0.35s ease;
   }
   .dark .obsidian-card {
-    box-shadow: 0 4px 30px hsl(0 0% 0% / 0.3);
+    box-shadow: 0 4px 30px hsl(0 0% 0% / 0.25);
   }
   .obsidian-card:hover {
-    border-color: hsl(var(--primary) / 0.4);
-    box-shadow: 0 10px 30px hsl(0 0% 0% / 0.1);
+    transform: translateY(-2px);
+    border-color: hsl(var(--primary) / 0.35);
+    box-shadow: 0 12px 32px hsl(0 0% 0% / 0.08);
   }
   .dark .obsidian-card:hover {
-    box-shadow: 0 10px 40px hsl(0 0% 0% / 0.5);
+    box-shadow: 0 14px 40px hsl(0 0% 0% / 0.4);
   }
 
-  /* Glow Effects */
-  .glow-primary {
-    box-shadow: var(--glow-primary);
+  /* Premium Glass Card */
+  .glass-card-premium {
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--border) / 0.6);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 30px 0 hsl(0 0% 0% / 0.03);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  .glass-card-premium:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--primary) / 0.35);
+    box-shadow: 0 16px 40px 0 hsl(var(--primary) / 0.08);
   }
 
-  /* Animated Subtle Shift */
-  .pulse-glow {
-    animation: pulse-glow 3s ease-in-out infinite;
-  }
-
-  /* Code Block Style */
-  .code-block {
-    font-family: 'JetBrains Mono', monospace;
-    @apply bg-muted rounded p-4 border border-border/50;
-  }
-
-  /* Premium Button style */
+  /* Button Premium */
   .btn-premium {
-    @apply bg-primary text-primary-foreground font-semibold transition-all duration-300 shadow-sm;
+    @apply bg-primary text-primary-foreground font-medium transition-all duration-300 shadow-sm rounded-lg;
   }
-
   .btn-premium:hover {
     transform: translateY(-1px);
     @apply opacity-95;
-    box-shadow: var(--glow-primary);
+    box-shadow: 0 6px 20px hsl(var(--primary) / 0.25);
   }
 
-  /* Section Container */
   .section-container {
     @apply max-w-7xl mx-auto px-6 sm:px-8 lg:px-12;
   }
 }
 
+/* Utility Scrollbars */
 @layer utilities {
-  /* Custom Scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
-
   .custom-scrollbar::-webkit-scrollbar-track {
     @apply bg-muted;
   }
-
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-primary/30 rounded;
+    @apply bg-primary/30 rounded-full;
   }
-
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     @apply bg-primary;
   }
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.15;
-    transform: scale(1);
+/* Subtle Noise Grain Overlay */
+.grain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0.012;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Ambient Cursor Glow Effect */
+.cursor-glow-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.cursor-glow-element {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+}
+
+/* Marquee Infinite Animation */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0%);
   }
-  50% {
-    opacity: 0.25;
-    transform: scale(1.05);
+  100% {
+    transform: translateX(-50%);
   }
 }
 
-/* Smooth Page Transitions */
-.page-enter {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.page-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+/* Accessibility: Global Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 

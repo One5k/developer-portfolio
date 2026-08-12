@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowRight, Github, Linkedin, ChevronDown } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { heroApi, profileApi } from '@/lib/api';
@@ -30,62 +31,39 @@ const HeroSection: React.FC = () => {
 
   if (isLoading) {
     return (
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
-        {/* Premium Ambient Light */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="relative z-10 section-container text-center pt-20 w-full">
-          <div className="max-w-4xl mx-auto flex flex-col items-center">
-            {/* Avatar skeleton */}
-            <div className="mb-8 w-32 h-32 md:w-40 md:h-40 rounded-full bg-muted animate-pulse" />
-            {/* Eyebrow skeleton */}
-            <div className="h-4 w-32 bg-muted mb-4 animate-pulse rounded" />
-            {/* Name/Title skeleton */}
-            <div className="h-16 md:h-20 w-3/4 bg-muted mb-6 animate-pulse rounded" />
-            {/* Subtitle skeleton */}
-            <div className="h-8 w-1/2 bg-muted mb-8 animate-pulse rounded" />
-            {/* Bio skeleton */}
-            <div className="h-4 w-2/3 bg-muted mb-2 animate-pulse rounded" />
-            <div className="h-4 w-1/2 bg-muted mb-10 animate-pulse rounded" />
-            {/* Buttons skeleton */}
-            <div className="flex gap-4">
-              <div className="h-12 w-36 bg-muted animate-pulse rounded-none" />
-              <div className="h-12 w-36 bg-muted animate-pulse rounded-none" />
-            </div>
-          </div>
+      <section className="relative min-h-[90vh] flex items-center justify-center bg-background pt-24 pb-12">
+        <div className="section-container w-full space-y-6 text-start">
+          <div className="h-4 w-28 bg-muted animate-pulse rounded-md" />
+          <div className="h-16 sm:h-24 w-3/4 bg-muted animate-pulse rounded-xl" />
+          <div className="h-8 w-1/2 bg-muted animate-pulse rounded-lg" />
+          <div className="h-16 w-2/3 bg-muted animate-pulse rounded-lg" />
         </div>
       </section>
     );
   }
 
-  // Fallback to defaults if loading or error, but ideally valid seed data should be present
-  const greeting = heroData 
-    ? (language === 'ar' ? heroData.greeting_ar : heroData.greeting_en)
-    : t('home.greeting');
-    
-  const title = heroData 
-    ? (language === 'ar' ? heroData.title_ar : heroData.title_en)
-    : t('home.name');
+  // All data from Supabase — no hardcoded fallbacks
+  const name = profileData
+    ? (language === 'ar' ? profileData.name_ar : profileData.name_en)
+    : '';
 
   const subtitle = heroData
     ? (language === 'ar' ? heroData.subtitle_ar : heroData.subtitle_en)
-    : t('home.title');
+    : '';
 
   const description = heroData
     ? (language === 'ar' ? heroData.description_ar : heroData.description_en)
-    : t('home.bio');
-    
-  // Combined social links from profile data
+    : '';
+
+  const title = heroData
+    ? (language === 'ar' ? heroData.title_ar : heroData.title_en)
+    : '';
+
+  const heroImage = heroData?.hero_image_url || null;
+
   const socialLinks = [
-    { 
-      icon: Github, 
-      href: profileData?.github_url, 
-      show: !!profileData?.github_url 
-    },
-    { 
-      icon: Linkedin, 
-      href: profileData?.linkedin_url, 
-      show: !!profileData?.linkedin_url 
-    }
+    { icon: Github, href: profileData?.github_url, label: 'GitHub', show: !!profileData?.github_url },
+    { icon: Linkedin, href: profileData?.linkedin_url, label: 'LinkedIn', show: !!profileData?.linkedin_url }
   ].filter(link => link.show);
 
   const scrollToProjects = (e: React.MouseEvent) => {
@@ -93,112 +71,145 @@ const HeroSection: React.FC = () => {
     const element = document.getElementById('projects');
     if (element) {
       const offsetTop = element.offsetTop - 80;
-      window.scrollTo({
-        top: offsetTop,
-        behavior: 'smooth',
-      });
+      window.scrollTo({ top: offsetTop, behavior: 'smooth' });
     }
   };
 
   const getWhatsAppUrl = () => {
-    if (!profileData?.phone) return 'https://wa.me/967773703388';
+    if (!profileData?.phone) return '#contact';
     const cleanPhone = profileData.phone.replace(/[+\s\-()]/g, '');
     return `https://wa.me/${cleanPhone}`;
   };
 
+  // Stagger animation config
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.12, delayChildren: 0.1 }
+    }
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } }
+  };
+
+  // Layout: With image → split grid. Without image → full-width centered
+  const hasImage = !!heroImage;
+
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
-      {/* Premium Ambient Light */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none animate-pulse-glow" />
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
+    <section id="hero" className="relative min-h-[90vh] flex items-center bg-background pt-28 pb-12 lg:pt-32 lg:pb-16 overflow-hidden">
+      <div className="section-container w-full relative z-10">
 
-      {/* Content */}
-      <div className="relative z-10 section-container text-center pt-20">
-        <div className="max-w-4xl mx-auto">
-          {/* Hero Image / Avatar */}
-          {heroData?.hero_image_url && (
-            <div className="mb-8 flex justify-center animate-fade-in">
-              <div className="relative group">
-                {/* Glowing ambient background */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-full blur-md opacity-50 group-hover:opacity-75 transition duration-500" />
-                <img
-                  src={heroData.hero_image_url}
-                  alt={title}
-                  className="relative w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-background shadow-2xl"
-                />
-              </div>
-            </div>
-          )}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className={`grid grid-cols-1 ${hasImage ? 'lg:grid-cols-12' : ''} gap-10 lg:gap-12 items-center`}
+        >
 
-          {/* Greeting Eyebrow (Distinctive, not generic numbers) */}
-          <p className="text-sm uppercase tracking-[0.25em] text-primary mb-4 font-bold">
-            {greeting}
-          </p>
+          {/* Text Content Block */}
+          <div className={`${hasImage ? 'lg:col-span-7 xl:col-span-8' : 'max-w-4xl'} text-start space-y-6`}>
 
-          {/* Large Name/Title */}
-          <h1 className="text-6xl md:text-8xl font-extrabold tracking-tight text-foreground mb-6 font-display">
-            {title}
-          </h1>
+            {/* Greeting / Role Tag */}
+            {subtitle && (
+              <motion.p variants={itemVariants} className="text-sm sm:text-base text-muted-foreground font-sans">
+                {subtitle}
+              </motion.p>
+            )}
 
-          {/* Subtitle */}
-          <p className="text-2xl md:text-3xl font-light text-muted-foreground mb-8 tracking-wide">
-            {subtitle}
-          </p>
-
-          {/* Bio Description */}
-          <p className="text-base md:text-lg text-muted-foreground/80 mb-10 max-w-2xl mx-auto leading-relaxed">
-            {description}
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Button
-              size="lg"
-              className="btn-premium rounded-none px-8 py-6 gap-2 group cursor-pointer"
-              onClick={scrollToProjects}
-            >
-              {t('home.cta.projects')}
-              <ArrowRight className={`h-4 w-4 transition-transform group-hover:translate-x-1 ${direction === 'rtl' ? 'rotate-180 group-hover:-translate-x-1' : ''}`} />
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="rounded-none border-border hover:bg-secondary hover:text-foreground px-8 py-6 text-muted-foreground cursor-pointer"
-            >
-              <a 
-                href={getWhatsAppUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
+            {/* Name — the focal point */}
+            {name && (
+              <motion.h1
+                variants={itemVariants}
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-foreground leading-[1.08] font-display no-letter-spacing"
+                style={{ textWrap: 'balance' } as React.CSSProperties}
               >
-                {t('home.cta.contact')}
-              </a>
-            </Button>
+                {name}
+              </motion.h1>
+            )}
+
+            {/* Description paragraph */}
+            {description && (
+              <motion.p variants={itemVariants} className="text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed font-sans">
+                {description}
+              </motion.p>
+            )}
+
+            {/* Actions */}
+            <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3 pt-2">
+              <Button
+                size="lg"
+                className="btn-premium rounded-xl px-6 py-5 text-sm gap-2 group cursor-pointer font-sans"
+                onClick={scrollToProjects}
+              >
+                <span>{t('home.cta.projects')}</span>
+                <ArrowRight className={`h-4 w-4 transition-transform ${direction === 'rtl' ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+              </Button>
+
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="rounded-xl border-border hover:bg-secondary hover:text-foreground px-6 py-5 text-sm text-muted-foreground cursor-pointer transition-colors font-sans"
+              >
+                <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
+                  {t('home.cta.contact')}
+                </a>
+              </Button>
+
+              {socialLinks.length > 0 && (
+                <div className="flex items-center gap-2 ms-1">
+                  {socialLinks.map((social) => (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2.5 rounded-lg text-muted-foreground hover:text-primary transition-colors"
+                      aria-label={social.label}
+                    >
+                      <social.icon className="h-5 w-5" />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+
           </div>
 
-          {/* Social Links */}
-          {socialLinks.length > 0 && (
-            <div className="flex items-center justify-center gap-6 text-muted-foreground">
-              {socialLinks.map((social, index) => (
-                <a
-                  key={index}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-primary transition-colors duration-300"
-                >
-                  <social.icon className="h-5 w-5" />
-                </a>
-              ))}
-            </div>
+          {/* Profile Image — only when image exists */}
+          {hasImage && (
+            <motion.div
+              variants={itemVariants}
+              className="lg:col-span-5 xl:col-span-4 flex justify-center lg:justify-end"
+            >
+              <div className="relative w-full max-w-[280px] sm:max-w-[320px] group">
+                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted">
+                  <img
+                    src={heroImage}
+                    alt={name}
+                    className="w-full h-full object-cover transition-all duration-700 group-hover:scale-[1.03]"
+                    loading="eager"
+                  />
+                  {/* Subtle bottom gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-50" />
+                </div>
+                {/* Floating name tag on image */}
+                <div className="absolute bottom-4 inset-x-4 px-4 py-3 rounded-xl bg-card/90 backdrop-blur-md border border-border/50 text-start">
+                  <p className="text-sm font-bold text-foreground font-display no-letter-spacing truncate">{name}</p>
+                  <p className="text-[11px] text-muted-foreground font-sans truncate">{title}</p>
+                </div>
+              </div>
+            </motion.div>
           )}
-        </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground/60 hover:text-primary transition-colors duration-300">
-          <span className="text-xs uppercase tracking-widest">{t('home.scroll')}</span>
-          <ChevronDown className="h-4 w-4 animate-bounce" />
-        </div>
+        </motion.div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-6 inset-x-0 hidden md:flex flex-col items-center gap-1 text-muted-foreground/30 pointer-events-none">
+        <ChevronDown className="h-4 w-4 animate-bounce" />
       </div>
     </section>
   );

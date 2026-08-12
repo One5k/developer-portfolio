@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Code, Server, Smartphone, Wrench, Users } from 'lucide-react';
+import { Layers, Terminal, Cpu, Layout, Smartphone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { skillsApi } from '@/lib/api';
+import ScrollReveal from '@/components/motion/ScrollReveal';
 
 interface SkillCategory {
   icon: React.ElementType;
@@ -15,150 +16,117 @@ const SkillsSection: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-     const fetchSkills = async () => {
-       try {
-         const { skills } = await skillsApi.getAll();
-         setSkills(skills);
-       } catch (error) {
-         console.error(error);
-       } finally {
-         setIsLoading(false);
-       }
-     }
-     fetchSkills();
+    const fetchSkills = async () => {
+      try {
+        const { skills } = await skillsApi.getAll();
+        setSkills(skills);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSkills();
   }, []);
 
   if (isLoading) {
     return (
-      <section id="skills" className="py-24 relative bg-background">
-        <div className="section-container">
-          <div className="text-center mb-20">
-            <div className="h-10 w-48 bg-muted animate-pulse mx-auto mb-4 rounded-none" />
-            <div className="h-4 w-64 bg-muted animate-pulse mx-auto rounded-none" />
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="obsidian-card rounded-none p-8 flex flex-col gap-4">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-10 w-10 bg-muted animate-pulse rounded-none" />
-                  <div className="h-6 w-32 bg-muted animate-pulse rounded-none" />
-                </div>
-                <div className="space-y-3">
-                  {[1, 2, 3, 4].map((j) => (
-                    <div key={j} className="h-10 w-full bg-muted animate-pulse rounded-none" />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+      <section id="skills" className="py-32 relative bg-background border-t border-border/40">
+        <div className="section-container space-y-12">
+          <div className="h-10 w-48 bg-muted animate-pulse rounded-xl" />
+          <div className="h-64 w-full bg-muted animate-pulse rounded-3xl" />
         </div>
       </section>
     );
   }
 
-  // Helper to categorize skills dynamically
   const getSkillsByCategory = (category: string) => {
     return skills
-      .filter(s => s.category === category)
-      .map(s => ({ name: s.name_en, level: s.proficiency }));
+      .filter((s) => s.category === category)
+      .map((s) => ({ name: s.name_en, level: s.proficiency }));
   };
 
   const categories: SkillCategory[] = [
     {
-      icon: Code,
-      title: { en: 'Frontend', ar: 'الواجهة الأمامية' },
+      icon: Layout,
+      title: { en: 'Frontend Architecture', ar: 'الواجهة الأمامية والهندسة' },
       skills: getSkillsByCategory('frontend'),
     },
     {
-      icon: Server,
-      title: { en: 'Backend', ar: 'الخلفية' },
+      icon: Cpu,
+      title: { en: 'Backend & APIs', ar: 'الخلفية وقواعد البيانات' },
       skills: getSkillsByCategory('backend'),
     },
     {
       icon: Smartphone,
-      title: { en: 'Mobile', ar: 'تطبيقات الجوال' },
+      title: { en: 'Mobile Development', ar: 'تطبيقات الجوال' },
       skills: getSkillsByCategory('mobile'),
     },
     {
-      icon: Wrench,
-      title: { en: 'Tools & DevOps', ar: 'الأدوات و DevOps' },
+      icon: Terminal,
+      title: { en: 'DevOps & Tooling', ar: 'الأدوات والبنية التحتية' },
       skills: getSkillsByCategory('tools'),
     },
-    // Retaining hardcoded soft skills as they might not be in DB or handled differently
     {
-      icon: Users,
-      title: { en: 'Soft Skills', ar: 'المهارات الشخصية' },
+      icon: Layers,
+      title: { en: 'UI/UX & Design Systems', ar: 'التصميم وتجربة المستخدم' },
       skills: getSkillsByCategory('soft'),
     },
   ];
 
-  // Filter out empty categories except soft skills
-  const activeCategories = categories.filter(c => c.skills.length > 0 || c.title.en === 'Soft Skills');
+  const activeCategories = categories.filter((c) => c.skills.length > 0);
 
   return (
-    <section id="skills" className="py-24 relative bg-background">
+    <section id="skills" className="py-16 lg:py-20 relative bg-background">
       <div className="section-container">
+        
         {/* Header */}
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground mb-4 font-display">
-            {t('skills.title')}
-          </h2>
-          <p className="text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            {language === 'ar'
-              ? 'التقنيات والأدوات التي أستخدمها لبناء حلول رقمية متميزة'
-              : 'Technologies and tools I use to build exceptional digital solutions'}
-          </p>
-        </div>
+        <ScrollReveal direction="up">
+          <div className="mb-10 text-start">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground font-display no-letter-spacing">
+              {t('skills.title')}
+            </h2>
+          </div>
+        </ScrollReveal>
 
-        {/* Skills Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {activeCategories.map((category, catIndex) => (
-            <div
-              key={category.title.en}
-              className="obsidian-card rounded-none p-8 animate-fade-in"
-              style={{ animationDelay: `${catIndex * 0.1}s` }}
-            >
-              {/* Category Header */}
-              <div className="flex items-center gap-3.5 mb-8">
-                <div className="p-3 rounded-none bg-secondary">
-                  <category.icon className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-lg font-bold text-foreground">{category.title[language]}</h3>
-              </div>
-
-              {/* Skills List - Technical Ledger style (No progress bars!) */}
-              <div className="space-y-3">
-                {category.skills.map((skill) => (
-                  <div 
-                    key={skill.name}
-                    className="flex items-center justify-between p-3.5 bg-secondary/30 border border-border/40 rounded-none hover:border-primary/30 transition-colors duration-200"
-                  >
-                    <span className="text-sm font-semibold text-foreground">{skill.name}</span>
-                    <span className="text-xs font-mono text-primary font-medium">{skill.level}%</span>
+        {/* Studio Technical Presentation Matrix */}
+        <div className="space-y-8">
+          {activeCategories.map((category, idx) => (
+            <ScrollReveal key={category.title.en} direction="up" delay={0.1 * idx}>
+              <div
+                className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start pb-8 border-b border-border/40 text-start"
+              >
+                {/* Category Identity (4 Cols) */}
+                <div className="lg:col-span-3 flex items-center gap-2.5">
+                  <div className="p-2 rounded-lg bg-secondary text-primary">
+                    <category.icon className="h-5 w-5" />
                   </div>
-                ))}
+                  <h3 className="text-base sm:text-lg font-bold text-foreground font-display no-letter-spacing">
+                    {category.title[language]}
+                  </h3>
+                </div>
+
+                {/* Skills Tags Ledger (8 Cols) */}
+                <div className="lg:col-span-9 flex flex-wrap gap-2 font-sans">
+                  {category.skills.map((skill) => (
+                    <div
+                      key={skill.name}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary/50 border border-border/50 text-foreground hover:border-primary/30 transition-colors duration-200"
+                    >
+                      <span className="text-xs font-medium">{skill.name}</span>
+                      <span className="text-[10px] font-mono text-muted-foreground/70 bg-background/80 px-2 py-0.5 rounded-md border border-border/40">
+                        {skill.level}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            </ScrollReveal>
           ))}
         </div>
 
-        {/* Tech Icons Cloud */}
-        <div className="mt-24 text-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <h3 className="text-xl font-bold text-foreground mb-10">
-            {language === 'ar' ? 'التقنيات التي أعمل بها' : 'Technologies I Work With'}
-          </h3>
-          <div className="flex flex-wrap justify-center gap-3">
-            {skills.map((skill, index) => (
-              <span
-                key={skill.id || index}
-                className="px-5 py-2.5 bg-secondary border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/50 text-xs font-mono uppercase tracking-wider rounded-none transition-all duration-200 cursor-default"
-                style={{ animationDelay: `${0.4 + index * 0.03}s` }}
-              >
-                {skill.name_en}
-              </span>
-            ))}
-          </div>
-        </div>
+
+
       </div>
     </section>
   );

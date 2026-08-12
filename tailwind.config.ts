@@ -19,9 +19,11 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Space Grotesk', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
-        arabic: ['Cairo', 'sans-serif'],
+        'display-ar': ['Thmanyah Serif Display', 'serif'],
+        'sans-ar': ['Thmanyah Sans', 'sans-serif'],
+        'serif-ar': ['Thmanyah Serif Text', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
